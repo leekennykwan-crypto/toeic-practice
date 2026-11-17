@@ -229,7 +229,7 @@ function render(){
  });
 }
 let VS=[],tok=0,FV=[],MV=[],RV={};
-const NOV=/albert|bad news|bahh|bells|boing|bubbles|cellos|good news|jester|organ|superstar|trinoids|whisper|wobble|zarvox|princess|junior|kathy|ralph|fred|agnes|bruce|vicki/i,MN=/daniel|alex|tom|oliver|david|mark|guy|ryan|eric|roger|aaron|arthur|evan|nathan|rishi|gordon|reed|eddy|rocko|grandpa|brian|james|george|alfred|\bmale\b/i,FN=/samantha|karen|moira|tessa|fiona|victoria|allison|ava|susan|zira|aria|jenny|kate|serena|sandy|shelley|flo|grandma|nicky|libby|sonia|michelle|emma|joanna|salli|kimberly|ivy|amy|nora|google us english|female/i;
+const NOV=/albert|bad news|bahh|bells|boing|bubbles|cellos|good news|jester|organ|superstar|trinoids|whisper|wobble|zarvox|princess|junior|kathy|ralph|fred|agnes|bruce|vicki|eddy|flo|grandma|grandpa|reed|rocko|sandy|shelley|eloquence|compact/i,MN=/daniel|alex|tom|oliver|david|mark|guy|ryan|eric|roger|aaron|arthur|evan|nathan|rishi|gordon|reed|eddy|rocko|grandpa|brian|james|george|alfred|\bmale\b/i,FN=/samantha|karen|moira|tessa|fiona|victoria|allison|ava|susan|zira|aria|jenny|kate|serena|sandy|shelley|flo|grandma|nicky|libby|sonia|michelle|emma|joanna|salli|kimberly|ivy|amy|nora|google us english|female/i;
 function gd(v){const n=v.name;if(NOV.test(n))return '';if(/female/i.test(n))return 'F';if(MN.test(n))return 'M';if(FN.test(n))return 'F';return ''}
 function rv(k,sp){const L=sp==='M'?MV:FV;if(!L.length)return VS[sp==='M'&&VS[1]?1:0];RV[k]=RV[k]||{};return RV[k][sp]||(RV[k][sp]=L[Math.floor(Math.random()*L.length)])}
 function sc(v){let s=0;if(/natural|online|neural|premium|enhanced/i.test(v.name))s+=4;if(/google us|samantha|aria|jenny|guy|ava|zira|david|mark|daniel|alex|ryan|eric/i.test(v.name))s+=2;if(/^en[-_]US/i.test(v.lang))s+=1;return s}
