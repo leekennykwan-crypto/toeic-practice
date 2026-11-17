@@ -28,7 +28,7 @@ button.on,button.pri{background:var(--ac);color:#fff;border-color:var(--ac)}
 .exp{font-size:.9rem;color:var(--mut);margin:4px 0 0}
 .bar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:16px 0}
 #res{font-weight:700}
-.note{font-size:.8rem;color:var(--mut)}select{font:inherit;background:var(--card);color:var(--tx);border:1px solid var(--bd);border-radius:8px;padding:6px;max-width:100%}.ctl{display:flex;gap:8px;flex-wrap:wrap;align-items:center;font-size:.85rem}.ptabs{display:flex;gap:6px;flex-wrap:wrap;margin:4px 0 8px}.ptabs button{padding:5px 10px;font-size:.85rem}
+.note{font-size:.8rem;color:var(--mut)}select{font:inherit;background:var(--card);color:var(--tx);border:1px solid var(--bd);border-radius:8px;padding:6px;max-width:100%}.ctl{display:flex;gap:8px;flex-wrap:wrap;align-items:center;font-size:.85rem}.ptabs{display:flex;gap:6px;flex-wrap:wrap;margin:4px 0 8px}.ptabs button{padding:5px 10px;font-size:.85rem}.vnote{font-size:.8rem;color:var(--mut);margin:6px 0 0;min-height:1em}
 </style>
 </head>
 <body>
@@ -211,7 +211,7 @@ function render(){
   const checked=D.has(gi);
   const c=document.createElement('div');c.className='card';
   let h='<div class="part">'+g.p+'</div>';
-  if(g.au)h+='<button data-play="'+gi+'">▶ 播放音檔</button>';
+  if(g.au)h+='<button data-play="'+gi+'">▶ 播放音檔</button><div class="vnote" id="vn'+gi+'">'+(VN[gi]||'')+'</div>';
   if(g.ps)h+='<div class="passage">'+g.ps+'</div>';
   (QO[gi]||g.qs.map((_,i)=>i)).forEach(qi=>{const q=g.qs[qi];
    const k=gi+'_'+qi;
@@ -242,8 +242,11 @@ function loadV(){
  const wi=VS.findIndex(v=>/female|samantha|aria|jenny|ava|zira|karen|allison|susan/i.test(v.name));
  fill('vW');fill('vM');FV=VS.filter(v=>gd(v)==='F');MV=VS.filter(v=>gd(v)==='M');
 }
+const VN={};
+function pv(sp,key){const sel=document.getElementById(sp==='M'?'vM':'vW').value;return sel==='r'?rv(key,sp):VS[+sel]}
 function say(lines,key,done){
  const my=++tok;speechSynthesis.cancel();
+ const us={};lines.forEach(([sp])=>{const v=pv(sp,key);if(v)us[sp]=v.name});const txt='使用聲音：'+['W','M'].filter(s=>us[s]).map(s=>(s==='W'?'女聲 ':'男聲 ')+us[s]).join('｜');VN[key]=txt;const el=document.getElementById('vn'+key);if(el)el.textContent=txt;
  let i=0;
  const next=()=>{
   if(my!==tok)return;
@@ -251,7 +254,7 @@ function say(lines,key,done){
   const [sp,t]=lines[i++];
   const u=new SpeechSynthesisUtterance(t);u.lang='en-US';
   u.rate=+document.getElementById('rt').value;u.pitch=1;u.volume=1;
-  const sel=document.getElementById(sp==='M'?'vM':'vW').value;const v=sel==='r'?rv(key,sp):VS[+sel];
+  const v=pv(sp,key);
   if(v){u.voice=v;u.lang=v.lang}
   u.onend=()=>setTimeout(next,700);u.onerror=()=>setTimeout(next,300);
   speechSynthesis.speak(u);
@@ -275,7 +278,7 @@ document.getElementById('chk').onclick=()=>{
  res.textContent='聽力 '+r.L[0]+'/'+r.L[1]+'　閱讀 '+r.R[0]+'/'+r.R[1]+'　合計 '+(r.L[0]+r.R[0])+'/'+(r.L[1]+r.R[1]);
  res.textContent=SUBN()+'　答對 '+(r.L[0]+r.R[0])+' / '+(r.L[1]+r.R[1])+' 題';render();
 };
-document.getElementById('rst').onclick=()=>{tok++;speechSynthesis.cancel();G.forEach((g,gi)=>{if(vis(g)){D.delete(gi);delete SW[gi];delete RV[gi];g.qs.forEach((q,qi)=>delete A[gi+'_'+qi])}});res.textContent='';render();window.scrollTo(0,0)};
+document.getElementById('rst').onclick=()=>{tok++;speechSynthesis.cancel();G.forEach((g,gi)=>{if(vis(g)){D.delete(gi);delete SW[gi];delete RV[gi];delete VN[gi];g.qs.forEach((q,qi)=>delete A[gi+'_'+qi])}});res.textContent='';render();window.scrollTo(0,0)};
 if(window.speechSynthesis){speechSynthesis.onvoiceschanged=loadV;loadV()}
 buildSub();render();
 </script>
