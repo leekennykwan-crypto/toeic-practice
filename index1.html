@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>多益聽力與閱讀練習</title>
+<style>
+:root{--bg:#f7f6f2;--card:#fff;--tx:#1f2328;--mut:#667085;--bd:#dcd9d0;--ac:#2f6fed;--ok:#1a7f4b;--okb:#e3f5ea;--no:#b42318;--nob:#fde8e6;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#17181b;--card:#222428;--tx:#ececec;--mut:#9aa0aa;--bd:#383b42;--ac:#6b9bff;--ok:#5fd694;--okb:#16301f;--no:#ff8a80;--nob:#3a1d1a;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#17181b;--card:#222428;--tx:#ececec;--mut:#9aa0aa;--bd:#383b42;--ac:#6b9bff;--ok:#5fd694;--okb:#16301f;--no:#ff8a80;--nob:#3a1d1a;color-scheme:dark}
+html,body{margin:0}
+body{background:var(--bg);color:var(--tx);font:16px/1.6 -apple-system,"Noto Sans TC","PingFang TC","Microsoft JhengHei",sans-serif}
+main{max-width:760px;margin:0 auto;padding:16px}
+h1{font-size:1.4rem;margin:.2em 0}
+.sub{color:var(--mut);font-size:.9rem;margin-bottom:12px}
+.tabs{display:flex;gap:8px;margin:12px 0;position:sticky;top:env(safe-area-inset-top,0px);background:var(--bg);padding:8px 0;z-index:5}
+.tabs button{flex:1}
+button{font:inherit;border:1px solid var(--bd);background:var(--card);color:var(--tx);padding:8px 14px;border-radius:8px;cursor:pointer}
+button.on,button.pri{background:var(--ac);color:#fff;border-color:var(--ac)}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:14px;margin:12px 0}
+.part{font-size:.8rem;color:var(--ac);font-weight:600}
+.passage{background:var(--bg);border-left:3px solid var(--bd);padding:8px 12px;margin:8px 0;white-space:pre-line;font-family:Georgia,serif}
+.q{margin:12px 0 4px;font-weight:600}
+.opt{display:block;width:100%;text-align:left;margin:6px 0}
+.opt.sel{border-color:var(--ac);box-shadow:0 0 0 1px var(--ac)}
+.opt.right{background:var(--okb);border-color:var(--ok);color:var(--ok)}
+.opt.wrong{background:var(--nob);border-color:var(--no);color:var(--no)}
+.exp{font-size:.9rem;color:var(--mut);margin:4px 0 0}
+.bar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:16px 0}
+#res{font-weight:700}
+.note{font-size:.8rem;color:var(--mut)}select{font:inherit;background:var(--card);color:var(--tx);border:1px solid var(--bd);border-radius:8px;padding:6px;max-width:100%}.ctl{display:flex;gap:8px;flex-wrap:wrap;align-items:center;font-size:.85rem}.ptabs{display:flex;gap:6px;flex-wrap:wrap;margin:4px 0 8px}.ptabs button{padding:5px 10px;font-size:.85rem}
+</style>
+</head>
+<body>
+<main>
+<h1>🎧 多益聽力與閱讀練習</h1>
+<div class="sub">題目為依多益（TOEIC L&amp;R）題型原創編寫的練習題，聽力由瀏覽器語音朗讀（建議使用 Chrome／Safari）。</div>
+<div class="bar" style="margin:0 0 8px"><button class="pri" id="shf">🔀 隨機排序</button><button id="ord">↩ 原順序</button></div>
+<div class="card ctl"><label>女聲 <select id="vW"></select></label><label>男聲 <select id="vM"></select></label><label>語速 <select id="rt"><option value="0.7">很慢</option><option value="0.8">慢</option><option value="0.9">稍慢</option><option value="1" selected>正常</option></select></label><button id="tst">試聽</button></div>
+<div class="tabs"><button id="tL" class="on">聽力 Listening</button><button id="tR">閱讀 Reading</button></div>
+<div class="ptabs" id="psub"></div>
+<div id="app"></div>
+<div class="bar"><button class="pri" id="chk">對答案</button><button id="rst">重新作答</button><span id="res"></span></div>
+<p class="note">實際考試每段錄音只播放一次；此處可重複播放，想模擬考場請自己只聽一次。</p>
+</main>
+<script>
+const P2raw=(q,o,a,e)=>({s:'L',p:'Part 2 應答問題',hide:1,au:[['W',q],['M','A. '+o[0]],['M','B. '+o[1]],['M','C. '+o[2]]],qs:[{q,o,a,e}]});
+const Q=(q,o,a,e)=>({q,o,a,e});
+let pc=0;const P2=(q,o,a,e)=>{const r=pc++%3,p=o.map((_,i)=>o[(i+3-r)%3]);return P2raw(q,p,(a+r)%3,e)};
+const C=(p,au,qs)=>({s:'L',p,au,qs});
+const G=[
+// Part 2
+{s:'L',p:'Part 2 應答問題',hide:1,au:[['W','Where can I find the printer toner?'],['M','A. It’s in the supply closet.'],['M','B. About twenty dollars.'],['M','C. Yes, I printed it yesterday.']],qs:[{q:'Where can I find the printer toner?',o:['It’s in the supply closet.','About twenty dollars.','Yes, I printed it yesterday.'],a:0,e:'Where 問地點，A 回答放在儲物櫃。'}]},
+{s:'L',p:'Part 2 應答問題',hide:1,au:[['M','Why was the meeting postponed?'],['W','A. At three o’clock.'],['W','B. The manager is out of town.'],['W','C. In the main conference room.']],qs:[{q:'Why was the meeting postponed?',o:['At three o’clock.','The manager is out of town.','In the main conference room.'],a:1,e:'Why 問原因，B 說明經理出差。'}]},
+{s:'L',p:'Part 2 應答問題',hide:1,au:[['W','Would you like to review the budget now or after lunch?'],['M','A. I’d prefer after lunch.'],['M','B. The review was very helpful.'],['M','C. No, it’s not on the menu.']],qs:[{q:'Would you like to review the budget now or after lunch?',o:['I’d prefer after lunch.','The review was very helpful.','No, it’s not on the menu.'],a:0,e:'選擇疑問句（now or after lunch），直接選一個。'}]},
+{s:'L',p:'Part 2 應答問題',hide:1,au:[['M','Haven’t the new brochures arrived yet?'],['W','A. Yes, I’d like a brochure.'],['W','B. They’re being delivered this afternoon.'],['W','C. At the front desk.']],qs:[{q:'Haven’t the new brochures arrived yet?',o:['Yes, I’d like a brochure.','They’re being delivered this afternoon.','At the front desk.'],a:1,e:'否定疑問句問到貨與否，B 說下午會送到。'}]},
+P2('When will the new employee start?',['Next Monday.','In the HR office.','She’s a designer.'],0,'When 問時間。'),
+P2('Who is in charge of the Berlin project?',['By train.','Ms. Weber is.','Last year.'],1,'Who 問人。'),
+P2('How often do you inspect the machines?',['Every two weeks.','In the factory.','About ten people.'],0,'How often 問頻率。'),
+P2('Could you help me carry these boxes?',['Sure, I’m free now.','They’re on sale.','Yes, it’s a box.'],0,'請求協助，答應即可。'),
+P2('Why don’t we take a taxi to the airport?',['That’s a good idea.','At gate nine.','Her flight was late.'],0,'Why don’t we 為提議，同意為正解。'),
+P2('Is the cafeteria open on weekends?',['Only for breakfast.','A new menu.','Yes, I opened it.'],0,'間接但合理的回答。'),
+P2('Which printer should I use for color copies?',['The one on the second floor.','A copy of the contract.','Yes, it’s colorful.'],0,'Which 問選擇。'),
+P2('I’d like to change my hotel reservation.',['Let me check availability.','The hotel is downtown.','No, I don’t have a pen.'],0,'客服情境的合理回應。'),
+P2('Where should I leave the signed forms?',['On my desk is fine.','Yes, I signed them.','At nine o’clock.'],0,'Where 問地點。'),
+P2('What time does the shuttle bus leave?',['At a quarter past ten.','At the bus stop.','It’s very comfortable.'],0,'What time 問時間。'),
+P2('Who’s going to present the sales figures?',['In the conference room.','Ms. Chen volunteered.','They went up.'],1,'Who 問人。'),
+P2('How much does the catering service cost?',['About fifteen dollars per person.','Around noon.','Yes, it was delicious.'],0,'How much 問價錢。'),
+P2('Do you want me to book the meeting room?',['No, I already did it.','It’s a long meeting.','The room is blue.'],0,'Yes/No 問句，已訂好。'),
+P2('Why is the elevator out of order?',['They’re repairing it.','On the fifth floor.','I usually take the stairs.'],0,'Why 問原因。'),
+P2('Where did you put the client’s file?',['In the top drawer.','About three clients.','Yes, he’s new.'],0,'Where 問地點。'),
+P2('When is the deadline for the proposal?',['By the end of this week.','A new proposal.','It’s on the table.'],0,'When 問時間。'),
+P2('Would you like some coffee while you wait?',['Yes, that would be nice.','At the café.','He waited for an hour.'],0,'邀約的回應。'),
+P2('Isn’t the training session starting at two?',['No, it was moved to three.','Yes, I like training.','A two-hour session.'],0,'否定疑問句，更正時間。'),
+P2('Who should I contact about my paycheck?',['The payroll department.','Next payday.','A check from the bank.'],0,'Who 問負責單位。'),
+P2('How did the interview go?',['Very well, I think.','At the main office.','Yes, I interviewed her.'],0,'How 問結果。'),
+P2('Can I borrow your stapler?',['Sure, here you are.','It’s staples.','At the supply store.'],0,'請求的回應。'),
+P2('Where is the nearest pharmacy?',['Just around the corner.','Twice a day.','It’s very expensive.'],0,'Where 問地點。'),
+P2('What did you think of the new logo?',['I like the colors.','At the design firm.','Last Thursday.'],0,'問看法。'),
+P2('Why don’t you join us for dinner tonight?',['I’d love to.','It was a great dinner.','At seven thirty.'],0,'邀請的回應。'),
+P2('Which candidate do you recommend?',['The one with more experience.','Yes, she recommended me.','A job candidate.'],0,'Which 問選擇。'),
+P2('Has the shipment arrived yet?',['Not yet, but it’s on its way.','By ship.','No, it’s too short.'],0,'問到貨與否。'),
+P2('Should we take the train or drive?',['Driving is faster.','Yes, a long train.','Last weekend.'],0,'選擇疑問句。'),
+P2('How long will the renovation take?',['About two months.','Every morning.','At the main entrance.'],0,'How long 問時間長度。'),
+P2('Where is the sales meeting being held?',['In Room 302.','On Thursday.','Mr. Brown is leading it.'],0,'Where 問地點。'),
+P2('Would you mind closing the window?',['Not at all.','It’s a nice view.','Yes, at noon.'],0,'Would you mind 的回應。'),
+P2('How many copies do you need?',['Twenty should be enough.','Next to the copier.','Yes, she did.'],0,'How many 問數量。'),
+P2('Who left this umbrella here?',['I think it’s Karen’s.','It’s raining hard.','Under the desk.'],0,'Who 問人。'),
+P2('What’s the fastest way to the train station?',['Take the Main Street bus.','At six o’clock.','Yes, the station is big.'],0,'問方式。'),
+P2('Don’t you have a presentation this afternoon?',['Yes, at three thirty.','A good present.','In the afternoon.'],0,'否定疑問句，確認事實。'),
+P2('When did the new manager join the company?',['Last spring.','In the finance team.','He’s very friendly.'],0,'When 問時間。'),
+P2('Why are the lights off in the lobby?',['They’re saving energy.','Turn left at the lobby.','A bright idea.'],0,'Why 問原因。'),
+// Part 3
+{s:'L',p:'Part 3 簡短對話',au:[['W','Hi Daniel, did you finish the sales report for Friday’s client meeting?'],['M','Almost. I’m still waiting for the figures from the Seoul office. Could you send them to me by noon?'],['W','I’ll email them right after I get off this call. By the way, should we print the handouts or share the file on screen?'],['M','Let’s print twenty copies. I’ll ask the front desk to take care of it.']],qs:[
+{q:'What are the speakers mainly discussing?',o:['A hiring plan','Preparing for a client meeting','A new office location','A software update'],a:1,e:'對話圍繞週五客戶會議的報告與講義。'},
+{q:'What does the woman say she will do?',o:['Call the Seoul office','Print the handouts','Email some figures','Reserve a room'],a:2,e:'她說講完電話就會把數據用 email 寄出。'},
+{q:'What will the man ask the front desk to do?',o:['Print copies','Book a flight','Send an invoice','Order lunch'],a:0,e:'他說要請櫃檯印二十份。'}]},
+{s:'L',p:'Part 3 簡短對話',au:[['W','Excuse me, I booked a room for two nights, but my colleague just told me our conference was moved to next week.'],['M','I’m sorry to hear that. I can change your reservation, but there’s a small fee if you cancel less than twenty-four hours before arrival.'],['W','That’s fine. Can you move it to next Tuesday instead?'],['M','Certainly. I’ll send a confirmation to your email in a few minutes.']],qs:[Q('Where does the conversation most likely take place?',['At a hotel','At a bank','At a restaurant','At a school'],0,'room、reservation 指向飯店櫃檯。'),Q('What problem does the woman mention?',['A lost key','A conference was rescheduled','A payment error','A noisy room'],1,'會議延到下週。'),Q('What will the man do?',['Refund the fee','Call her colleague','Send a confirmation email','Upgrade her room'],2,'他說會寄確認信。')]},
+C('Part 3 簡短對話',[['W','Henry, the projector in Room 4 isn’t working again.'],['M','I’ll call the IT department. They fixed it last week, so it might be a cable problem.'],['W','Thanks. I have a presentation at two, so I need it working before then.'],['M','Understood. I’ll ask them to come right away.']],[Q('What is the problem?',['A projector is not working','A meeting was cancelled','A cable is missing','A room is booked'],0,'開頭即說投影機壞了。'),Q('Who will the man call?',['A client','The IT department','A supplier','His manager'],1,'I’ll call the IT department。'),Q('What does the woman have at two o’clock?',['An interview','A lunch','A presentation','A training'],2,'presentation at two。')]),
+C('Part 3 簡短對話',[['M','Hello, I’m calling about the company dinner on the twentieth. We’d like to add five more guests.'],['W','Let me check. We can seat up to forty people in the private room. How many do you have now?'],['M','Thirty-two, so thirty-seven with the new guests.'],['W','That works. I’ll update the booking and send you the revised menu.']],[Q('Why is the man calling?',['To cancel a reservation','To add more guests','To change the menu','To ask for directions'],1,'add five more guests。'),Q('How many people can the private room seat?',['Thirty-two','Thirty-seven','Forty','Fifty'],2,'seat up to forty。'),Q('What will the woman send?',['A bill','A map','A revised menu','A coupon'],2,'send you the revised menu。')]),
+C('Part 3 簡短對話',[['W','Thanks for coming in. Your résumé shows five years in marketing. Why do you want to join our company?'],['M','I admire your recent campaigns, and I’d like to work with a larger international team.'],['W','Great. Our team is hiring two people. We’ll contact you by Friday.']],[Q('What is the woman doing?',['Interviewing a candidate','Giving a tour','Selling a product','Teaching a class'],0,'談履歷與應徵動機，是面試。'),Q('What does the man say he wants?',['A higher salary','A shorter commute','To work with an international team','To change careers'],2,'larger international team。'),Q('When will the woman contact the man?',['Today','Tomorrow','By Friday','Next month'],2,'contact you by Friday。')]),
+C('Part 3 簡短對話',[['M','I bought this jacket last week, but the zipper is broken.'],['W','I’m sorry about that. Do you have the receipt?'],['M','Yes, here it is. I’d prefer an exchange rather than a refund.'],['W','No problem. Let me check if we have another one in your size.']],[Q('What is the man’s problem?',['His jacket is too small','The zipper is broken','He lost his receipt','The price is wrong'],1,'the zipper is broken。'),Q('What does the man prefer?',['A refund','A discount','An exchange','Store credit'],2,'prefer an exchange。'),Q('What will the woman check?',['The return policy','The warranty','Whether another jacket is available','The store hours'],2,'check if we have another one。')]),
+C('Part 3 簡短對話',[['M','Did you hear that our department is moving to the third floor next month?'],['W','Yes, I got the email. I’m a little worried about the parking, though. They’re closing the lot behind the building for construction.'],['M','I heard they’ll offer a shuttle from the public garage across the street.'],['W','That’s a relief. I’ll sign up for it today.']],[Q('What are the speakers discussing?',['A department move','A new hire','A budget cut','A holiday party'],0,'部門搬到三樓。'),Q('What is the woman concerned about?',['Noise','Rent','Parking','Safety'],2,'worried about the parking。'),Q('What will the woman do?',['Buy a bus pass','Sign up for a shuttle','Call the landlord','Work from home'],1,'I’ll sign up for it today。')]),
+C('Part 3 簡短對話',[['W','Mr. Evans, our latest order of paper arrived with several damaged boxes.'],['M','I apologize. I’ll send a replacement shipment tomorrow at no extra charge.'],['W','Thank you. Should we return the damaged boxes?'],['M','No need. Just send me some photos by email for our records.']],[Q('Why is the woman calling?',['To report damaged goods','To place a new order','To ask for a discount','To change an address'],0,'貨品箱子受損。'),Q('What will the man do?',['Issue a refund','Send a replacement shipment','Visit the warehouse','Raise the price'],1,'send a replacement shipment。'),Q('What does the man ask the woman to send?',['A receipt','A new order form','Some photos','The damaged boxes'],2,'send me some photos。')]),
+C('Part 3 簡短對話',[['M','Have you registered for the leadership workshop next Wednesday?'],['W','Not yet. Is it open to everyone?'],['M','Only to team leaders, but you’ve just been promoted, so you qualify. Registration closes tomorrow at noon.'],['W','Thanks for telling me. I’ll sign up right now.']],[Q('What is the workshop about?',['Accounting','Safety','Leadership','Marketing'],2,'leadership workshop。'),Q('Why does the woman qualify?',['She was recently promoted','She is new to the company','She works in HR','She paid a fee'],0,'you’ve just been promoted。'),Q('When does registration close?',['Tonight at midnight','Tomorrow at noon','Next Wednesday','Friday morning'],1,'closes tomorrow at noon。')]),
+C('Part 3 簡短對話',[['W','I’m flying to Chicago next week for the trade show. Do you know a good hotel near the convention center?'],['M','The Lakeside Hotel is only a five-minute walk, and it offers a discount for conference attendees.'],['W','Great. Do I need a code?'],['M','Yes, mention the code TRADE20 when you book.']],[Q('What is the woman planning?',['A vacation','A business trip','A job interview','A wedding'],1,'飛去參加商展，是出差。'),Q('What does the man recommend?',['A hotel','A restaurant','An airline','A taxi service'],0,'推薦 Lakeside Hotel。'),Q('What does the man say she needs when booking?',['A passport','A discount code','A deposit','A recommendation letter'],1,'mention the code TRADE20。')]),
+// Part 4
+{s:'L',p:'Part 4 簡短獨白',au:[['W','Attention all passengers on Flight 208 to Vancouver. Due to heavy snow, departure is delayed by approximately ninety minutes. Passengers may collect a meal voucher at Gate 12. Please keep checking the monitors for updates, as the gate may change.']],qs:[
+{q:'Where is the announcement most likely being made?',o:['At a train station','At an airport','At a hotel','At a bus terminal'],a:1,e:'Flight、departure、Gate 都是機場用語。'},
+{q:'What are passengers offered?',o:['A free upgrade','A taxi fare','A meal voucher','A hotel room'],a:2,e:'廣播提到可在 Gate 12 領餐券。'},
+{q:'What are listeners asked to do?',o:['Check the monitors','Call the airline','Show their passports','Move to another gate now'],a:0,e:'最後一句：keep checking the monitors。'}]},
+{s:'L',p:'Part 4 簡短獨白',au:[['M','Good morning, everyone. Before we begin today’s workshop, I’d like to remind you that the new expense system goes live on Monday. You’ll need to log in with your employee number, and receipts must be uploaded as photos. If you have any trouble, the finance team will hold a help session on Friday afternoon.']],qs:[Q('What is the main topic of the talk?',['A new expense system','A holiday schedule','A hiring policy','An office move'],0,'開頭即提到新的報帳系統。'),Q('What must employees upload?',['Their résumés','Receipts','Time sheets','Contracts'],1,'receipts must be uploaded。'),Q('What will happen on Friday?',['A product launch','A system shutdown','A help session','A training exam'],2,'finance team 週五辦協助時段。')]},
+C('Part 4 簡短獨白',[['W','Looking for a new way to stay fit? Sunrise Gym is offering a thirty-day free trial for new members this month. Enjoy modern equipment, group classes, and a swimming pool. Visit our website to sign up before the offer ends on the thirty-first.']],[Q('What is being advertised?',['A restaurant','A gym','A hotel','A school'],1,'Sunrise Gym。'),Q('What is offered to new members?',['A free trial','A free shirt','A half-price pool pass','A personal trainer'],0,'thirty-day free trial。'),Q('What should listeners do to sign up?',['Call a number','Visit a website','Come on Monday','Send an email'],1,'Visit our website。')]),
+C('Part 4 簡短獨白',[['M','Welcome to the City Art Museum. Today’s tour will last about an hour, and photography is allowed in all galleries except the east wing. Please keep your voices low. After the tour, you’re welcome to visit the gift shop on the first floor.']],[Q('Who is speaking?',['A museum guide','A shop clerk','A security guard','An artist'],0,'Welcome 並說明導覽行程。'),Q('What is restricted?',['Taking photos in the east wing','Bringing bags','Talking to guides','Visiting the gift shop'],0,'except the east wing。'),Q('Where is the gift shop?',['On the first floor','In the east wing','On the roof','Near the parking lot'],0,'gift shop on the first floor。')]),
+C('Part 4 簡短獨白',[['W','Hello, Mr. Alvarez. This is Julia from Bright Dental. I’m calling to confirm your appointment tomorrow at ten thirty. If you need to reschedule, please call us back before five today. Also, please arrive ten minutes early to fill out a form.']],[Q('Why is the speaker calling?',['To confirm an appointment','To sell insurance','To ask for payment','To offer a job'],0,'to confirm your appointment。'),Q('What should Mr. Alvarez do if he needs to reschedule?',['Send an email','Visit the office','Call before five o’clock','Fill out a form'],2,'call us back before five。'),Q('What is he asked to do on arrival day?',['Bring an ID card','Arrive ten minutes early','Pay in advance','Park in the rear'],1,'arrive ten minutes early。')]),
+C('Part 4 簡短獨白',[['W','Attention shoppers. Our spring sale begins tomorrow morning at nine. All outdoor furniture will be thirty percent off, and customers who spend over a hundred dollars will receive a free garden tool. Parking will be free all weekend.']],[Q('Where is the announcement most likely heard?',['At a bank','In a store','At a library','On a train'],1,'shoppers、sale 指向商店。'),Q('What discount is offered on outdoor furniture?',['Ten percent','Twenty percent','Thirty percent','Fifty percent'],2,'thirty percent off。'),Q('What will customers receive if they spend over a hundred dollars?',['Free parking','A garden tool','A gift card','Free delivery'],1,'a free garden tool。')]),
+C('Part 4 簡短獨白',[['M','Hi team, this is a reminder that tomorrow’s staff meeting has been moved from nine to ten thirty because of the client visit. We’ll meet in the larger conference room on the second floor. Please bring your monthly progress reports.']],[Q('What has changed?',['The meeting time','The meeting topic','The client list','The report format'],0,'從九點改到十點半。'),Q('Where will the meeting be held?',['In the lobby','In a second-floor conference room','At the client’s office','In the cafeteria'],1,'larger conference room on the second floor。'),Q('What are listeners asked to bring?',['Lunch','Name tags','Progress reports','Laptops'],2,'monthly progress reports。')]),
+C('Part 4 簡短獨白',[['W','This is the evening traffic report. A truck breakdown on Highway 9 is causing long delays heading downtown. Drivers are advised to use Maple Avenue instead. The road should be cleared by seven thirty, according to city officials.']],[Q('What is the report about?',['Weather','A parade','Traffic conditions','A construction plan'],2,'traffic report。'),Q('What are drivers advised to do?',['Use Maple Avenue','Take the train','Stay home','Pay a toll'],0,'use Maple Avenue instead。'),Q('When is the road expected to be cleared?',['At six','At seven thirty','At nine','Tomorrow'],1,'cleared by seven thirty。')]),
+C('Part 4 簡短獨白',[['M','Before we enter the production area, I’d like to go over a few safety rules. Everyone must wear a helmet and safety glasses. Please stay behind the yellow lines at all times, and do not touch any equipment. Helmets are available at the entrance.']],[Q('Who is the audience?',['Visitors to a factory','Hotel guests','New students','Delivery drivers'],0,'production area 與安全規則。'),Q('What must everyone wear?',['Uniforms','Helmets and safety glasses','Gloves and boots','Name badges'],1,'helmet and safety glasses。'),Q('Where can the listeners get helmets?',['In the office','From a supervisor','At the entrance','Online'],2,'available at the entrance。')]),
+C('Part 4 簡短獨白',[['W','Good evening, everyone. It’s my pleasure to present this year’s Employee of the Year award to Mr. Tanaka from our customer support team. His dedication helped us improve customer satisfaction by twenty percent. Mr. Tanaka, please come to the stage.']],[Q('What is the purpose of the speech?',['To present an award','To announce a merger','To introduce a product','To explain a policy'],0,'present … award。'),Q('What did Mr. Tanaka help improve?',['Sales figures','Customer satisfaction','Office safety','Staff training'],1,'improve customer satisfaction。'),Q('What is Mr. Tanaka asked to do?',['Give a report','Come to the stage','Sign a form','Call a client'],1,'please come to the stage。')]),
+// Part 5
+{s:'R',p:'Part 5 句子填空',qs:[
+{q:'The company ______ its annual report to shareholders next week.',o:['sends','will send','sent','sending'],a:1,e:'next week 表未來，用 will send。'},
+{q:'Ms. Tanaka was ______ for her outstanding sales performance.',o:['recognize','recognition','recognized','recognizing'],a:2,e:'被動語態 was + 過去分詞。'},
+{q:'All employees must submit expense forms ______ the end of each month.',o:['by','since','during','among'],a:0,e:'by 表示「在……之前（截止）」。'},
+{q:'The new software is ______ easier to use than the previous version.',o:['significant','significance','significantly','signify'],a:2,e:'副詞修飾比較級形容詞 easier。'},
+{q:'Please contact the HR department ______ you have any questions about benefits.',o:['unless','if','but','so'],a:1,e:'「如果有任何問題」用 if。'},
+{q:'The conference room is ______ for the training session on Thursday.',o:['available','availably','availability','avail'],a:0,e:'be 動詞後接形容詞 available。'}]},
+{s:'R',p:'Part 5 句子填空（二）',qs:[
+Q('Mr. Kim ______ the quarterly meeting every March.',['host','hosts','hosting','to host'],1,'主詞單數，現在式加 s。'),
+Q('The manager asked us to complete the survey ______.',['prompt','prompting','promptly','promptness'],2,'副詞修飾動詞。'),
+Q('______ the heavy rain, the outdoor concert went ahead as planned.',['Despite','Although','Because','However'],0,'後接名詞片語用 Despite。'),
+Q('Our new product line is designed to appeal ______ younger customers.',['at','to','for','with'],1,'appeal to 固定搭配。'),
+Q('The contract must be signed by both ______.',['part','parties','partly','partial'],1,'both 後接複數名詞，parties 指簽約方。'),
+Q('Employees who work overtime will be ______ with extra pay.',['compensate','compensated','compensating','compensation'],1,'被動語態。'),
+Q('The warehouse is ______ located near the main highway.',['conveniently','convenient','convenience','convene'],0,'副詞修飾分詞 located。'),
+Q('We need to hire someone ______ has experience in logistics.',['who','whom','whose','which'],0,'指人的主格關係代名詞。'),
+Q('The report was so ______ that everyone understood it easily.',['clarity','clear','clearly','clarify'],1,'be 動詞後接形容詞。'),
+Q('Ms. Lopez has worked at the firm ______ 2015.',['for','since','during','while'],1,'現在完成式搭配 since + 時間點。'),
+Q('Customers may return any item within thirty days ______ purchase.',['of','on','at','by'],0,'within … days of 為固定用法。'),
+Q('The board is ______ to approve the merger next month.',['expect','expects','expected','expecting'],2,'be expected to 預期會。'),
+Q('Please keep your receipt ______ proof of purchase.',['as','like','than','so'],0,'as 表示「作為」。'),
+Q('Sales ______ by 15 percent last quarter.',['rose','raised','arose','rising'],0,'rise 為不及物動詞，過去式 rose。'),
+Q('The training session was ______ useful than I expected.',['much','more','most','very'],1,'than 前用比較級 more。'),
+Q('All visitors must wear an identification ______ in the building.',['badge','badges','badging','badged'],0,'an 後接單數名詞。'),
+Q('The proposal was rejected ______ it exceeded the budget.',['because','so','despite','unless'],0,'後接子句表原因。'),
+Q('Mr. Park is responsible ______ training new staff.',['of','for','at','in'],1,'responsible for 固定搭配。'),
+Q('The factory will remain closed ______ further notice.',['until','during','between','within'],0,'until further notice 另行通知前。'),
+Q('Applicants are ______ to submit a résumé and two references.',['require','requiring','required','requirement'],2,'be required to 被要求。')]},
+{s:'R',p:'Part 5 句子填空（三）',qs:[
+Q('The meeting has been ______ until further notice.',['postponed','postpone','postponing','postponement'],0,'has been + 過去分詞。'),
+Q('Ms. Sato is the most ______ employee in the department.',['dependable','dependably','depend','dependence'],0,'the most 後接形容詞。'),
+Q('The tickets will be sold ______ the box office only.',['at','in','on','over'],0,'at the box office 固定用法。'),
+Q('______ completing the form, please return it to the front desk.',['Once','During','Despite','Between'],0,'Once + V-ing，「一旦完成」。'),
+Q('The company plans to ______ its operations to Asia.',['expand','expansion','expansive','expanding'],0,'plans to + 原形動詞。'),
+Q('The new policy applies ______ all full-time staff.',['to','at','by','of'],0,'apply to 適用於。'),
+Q('We were ______ impressed by the quality of the service.',['high','highly','height','heighten'],1,'副詞修飾形容詞 impressed。'),
+Q('Neither the manager ______ the assistants were informed.',['or','nor','but','and'],1,'neither … nor 固定搭配。'),
+Q('The software update will be available ______ Friday.',['on','in','at','to'],0,'星期前用 on。'),
+Q('She is considering ______ a new position abroad.',['accept','accepting','accepted','acceptance'],1,'consider 後接 V-ing。'),
+Q('The hotel offers a ______ breakfast to all guests.',['complimentary','complimenting','compliment','complimentarily'],0,'complimentary 表「免費的」。'),
+Q('Please ______ the attached file before the meeting.',['review','reviews','reviewing','reviewed'],0,'祈使句用原形動詞。'),
+Q('The factory produces ______ 500 units per day.',['nearly','near','nearness','nearing'],0,'nearly 修飾數字，「將近」。'),
+Q('Applications must be ______ by March 31.',['receive','received','receiving','receipt'],1,'must be + 過去分詞。'),
+Q('______ the budget is limited, we will continue the project.',['Although','However','Because of','Despite'],0,'連接子句用 Although。'),
+Q('Employees are encouraged to take ______ of the wellness program.',['advantage','advantageous','advantageously','advantaged'],0,'take advantage of 善用。'),
+Q('The CEO will announce the results ______ a press conference.',['at','with','into','along'],0,'at a press conference。'),
+Q('Mr. Davis is highly ______ in the field of finance.',['respect','respected','respecting','respectful'],1,'highly respected 備受尊敬。'),
+Q('We ______ the order as soon as the payment clears.',['ship','will ship','shipped','shipping'],1,'時間子句現在式，主句用未來式。'),
+Q('The training manual is ______ to all new employees.',['distribute','distributed','distributing','distribution'],1,'被動語態。')]},
+// Part 6
+{s:'R',p:'Part 6 段落填空',ps:'To: All Staff\nSubject: Office Closure\n\nWe would like to inform you that the office will be closed on Monday, December 1, for building maintenance. All employees are expected to work from home (1)______ the closure. Please make sure you can access the company network before then. If you experience any (2)______, contact the IT help desk at extension 305. Normal business hours will (3)______ on Tuesday.',qs:[
+{q:'空格 (1)',o:['during','among','toward','beneath'],a:0,e:'during + 期間名詞，「在停辦期間」。'},
+{q:'空格 (2)',o:['difficult','difficulties','difficultly','more difficult'],a:1,e:'any 後接名詞，複數 difficulties。'},
+{q:'空格 (3)',o:['resume','resumed','resuming','be resumed'],a:0,e:'will 後接原形動詞；resume 為「恢復」，主動語態。'}]},
+{s:'R',p:'Part 6 段落填空（二）',ps:'Dear Customers,\n\nThank you for choosing Harbor Café. Beginning next month, we will (1)______ our opening hours to serve you better. The café will open at 7 A.M. on weekdays. In addition, we are pleased to (2)______ a new seasonal menu featuring locally grown ingredients. (3)______ customers will receive a free coffee with any breakfast order during the first week. We look forward to seeing you.',qs:[Q('空格 (1)',['extend','extends','extending','extended'],0,'will 後接原形動詞。'),Q('空格 (2)',['introduce','introduction','introduced','introducing'],0,'be pleased to 後接原形動詞。'),Q('空格 (3)',['Regular','Regularly','Regularity','Regulate'],0,'形容詞修飾名詞 customers。')]},
+{s:'R',p:'Part 6 段落填空（三）',ps:'To: All Employees\nFrom: Facilities Department\nSubject: Parking Lot Repairs\n\nThe east parking lot will be (1)______ for repairs from June 5 to June 9. During this time, employees are (2)______ to use the south lot or the public garage on Elm Street. The company will (3)______ parking fees at the garage for the period. (4)______ We apologize for any inconvenience.',qs:[Q('空格 (1)',['close','closed','closing','closure'],1,'will be + 過去分詞。'),Q('空格 (2)',['ask','asked','asking','asks'],1,'are asked to 被請求。'),Q('空格 (3)',['reimburse','reimbursed','reimbursing','reimbursement'],0,'will 後接原形動詞。'),Q('空格 (4)',['Please keep your receipts and submit them to the finance office.','The garage is open all year.','Repairs began last year.','The south lot is closed on Fridays.'],0,'承接前文報銷停車費，接收據說明。')]},
+{s:'R',p:'Part 6 段落填空（四）',ps:'Dear Ms. Garcia,\n\nThank you for your inquiry about our conference services. Our event center can (1)______ up to 200 guests and includes a stage, a sound system, and free Wi-Fi. We also provide catering at a (2)______ rate for groups over fifty. To (3)______ a date, please send a deposit of 20 percent. (4)______',qs:[Q('空格 (1)',['accommodate','accommodation','accommodating','accommodated'],0,'can 後接原形動詞。'),Q('空格 (2)',['reduce','reduced','reducing','reduction'],1,'reduced rate 優惠價。'),Q('空格 (3)',['reserve','reserves','reserved','reserving'],0,'To + 原形動詞。'),Q('空格 (4)',['We look forward to hosting your event.','The stage was built last year.','Parking is not allowed.','Our office closes on Sundays.'],0,'信件結尾的客套語。')]},
+// Part 7
+{s:'R',p:'Part 7 閱讀理解',ps:'Greenfield Public Library — Extended Hours\n\nStarting March 1, the library will open at 8:00 A.M. instead of 9:00 A.M. on weekdays. Closing time remains 8:00 P.M. Saturday hours (10 A.M.–4 P.M.) are unchanged. Library cardholders can also reserve study rooms online up to seven days in advance. A valid card is required to borrow materials. New cards are free for local residents.',qs:[
+{q:'What is the purpose of the notice?',o:['To announce a new building','To announce changed opening hours','To advertise a book sale','To recruit volunteers'],a:1,e:'標題與首句即說明開館時間延長。'},
+{q:'What time will the library open on weekdays after March 1?',o:['8:00 A.M.','9:00 A.M.','10:00 A.M.','8:00 P.M.'],a:0,e:'open at 8:00 A.M. instead of 9:00 A.M.'},
+{q:'What is indicated about study rooms?',o:['They are free to nonresidents.','They can be booked online in advance.','They are open Saturdays only.','They require a fee.'],a:1,e:'reserve study rooms online up to seven days in advance。'}]},
+{s:'R',p:'Part 7 閱讀理解（二）',ps:'From: Sandra Lee\nTo: Tom Reyes\nSubject: Delivery Delay\n\nDear Mr. Reyes,\n\nI am writing about your order #4482 of office chairs. Unfortunately, our supplier has informed us that the shipment will arrive three days later than planned, on June 14. We apologize for the inconvenience. As compensation, we will include a free set of desk organizers with your order. If you would prefer to cancel, please reply by June 10 and we will issue a full refund.',qs:[Q('Why did Ms. Lee write the email?',['To place an order','To report a delay','To request a payment','To offer a job'],1,'說明出貨延遲三天。'),Q('What will Mr. Reyes receive for free?',['A discount coupon','Extra chairs','Desk organizers','A gift card'],2,'free set of desk organizers。'),Q('What must Mr. Reyes do by June 10 if he wants to cancel?',['Return the chairs','Call the supplier','Reply to the email','Pay a fee'],2,'please reply by June 10。')]},
+{s:'R',p:'Part 7 閱讀理解（三）',ps:'Café Lumen — Now Hiring!\n\nCafé Lumen, a popular coffee shop in the city center, is looking for part-time baristas. Applicants should be available for evening shifts, Monday through Friday. Previous experience is preferred but not required, as training will be provided. To apply, send your résumé to jobs@cafelumen.example by April 15. Selected applicants will be contacted for an interview.',qs:[Q('What is the purpose of the advertisement?',['To promote a new menu','To recruit part-time workers','To announce a closing','To sell equipment'],1,'looking for part-time baristas。'),Q('What is indicated about the job?',['It requires prior experience','Training is provided','It is for weekends only','It pays by the hour'],1,'training will be provided。'),Q('What should applicants do by April 15?',['Visit the café','Call the manager','Send a résumé','Attend an interview'],2,'send your résumé … by April 15。')]},
+{s:'R',p:'Part 7 閱讀理解（四）',ps:'City Council Approves New Bike Lanes\n\nThe city council voted on Tuesday to add bike lanes along Riverside Avenue. Construction will begin in September and is expected to take three months. Council member Linda Park said the project would reduce traffic and improve safety. The project will cost 1.2 million dollars, which will be paid from the city’s transportation fund. Residents can share opinions at a public meeting on August 20.',qs:[Q('What is the article mainly about?',['A traffic accident','A plan for new bike lanes','A new bus route','A road closure'],1,'議會通過新增自行車道。'),Q('When will construction begin?',['In August','In September','In October','In December'],1,'begin in September。'),Q('How will the project be paid for?',['By a loan','By residents’ donations','From the transportation fund','By a private company'],2,'paid from the city’s transportation fund。'),Q('What can residents do on August 20?',['Vote on the plan','Attend a public meeting','Apply for a permit','Ride the bikes'],1,'share opinions at a public meeting。')]},
+{s:'R',p:'Part 7 閱讀理解（五）',ps:'Notice to Tenants — Water Shutoff\n\nPlease be advised that water service to Building B will be shut off on Saturday, May 3, from 9 A.M. to 1 P.M. for pipe maintenance. Residents are encouraged to store enough water for drinking and cooking before the shutoff. Service will resume as soon as the work is completed. For questions, contact the building manager, Ms. Okafor, at extension 21.',qs:[Q('Why will water be shut off?',['To fix a leak in the roof','For pipe maintenance','To install a new heater','For a safety inspection'],1,'for pipe maintenance。'),Q('What are residents encouraged to do?',['Store water beforehand','Move out temporarily','Pay a fee','Call the city'],0,'store enough water … before the shutoff。'),Q('Who should be contacted with questions?',['A plumber','The city office','Ms. Okafor','A neighbor'],2,'contact the building manager, Ms. Okafor。')]},
+{s:'R',p:'Part 7 閱讀理解（六）',ps:'From: Paul Nguyen\nTo: Design Team\nSubject: Schedule Change\n\nTeam,\nThe product review originally planned for Wednesday has been moved to Thursday at 2 P.M. because the client cannot attend earlier. Please update your calendars and finish your slides by Wednesday evening. If you have a conflict on Thursday, let me know by Tuesday.',qs:[Q('Why was the meeting moved?',['The client is unavailable earlier','A room is unavailable','The slides are not ready','Paul is traveling'],0,'the client cannot attend earlier。'),Q('When should the slides be finished?',['Tuesday morning','Wednesday evening','Thursday at 2 P.M.','Friday'],1,'finish your slides by Wednesday evening。'),Q('What should team members with a conflict do?',['Skip the meeting','Notify Paul by Tuesday','Send slides early','Ask the client'],1,'let me know by Tuesday。')]},
+{s:'R',p:'Part 7 閱讀理解（七）',ps:'Bayside Furniture — Year-End Clearance\n\nEnjoy up to 50 percent off selected sofas, tables, and bookshelves from December 1 to December 15. Free delivery is available for orders over 300 dollars within the city. Sale items cannot be returned, but they may be exchanged within seven days. Visit our showroom on Harbor Road or shop online.',qs:[Q('What is being advertised?',['A repair service','A clearance sale','A job opening','A delivery app'],1,'Year-End Clearance 年終清倉。'),Q('What is true about delivery?',['It is free for orders over $300','It is available worldwide','It costs fifty dollars','It takes seven days'],0,'Free delivery … over 300 dollars。'),Q('What can customers do with sale items within seven days?',['Return them for a refund','Exchange them','Resell them','Trade them in'],1,'may be exchanged within seven days。')]},
+{s:'R',p:'Part 7 閱讀理解（八）',ps:'Orion Tech Opens Second Office\n\nOrion Tech, a software company founded in 2016, announced the opening of its second office in Taichung. The new location will employ about 80 people, mainly engineers and customer support staff. CEO Ellen Wu said the expansion reflects growing demand for the company’s mobile payment app. The office will officially open on July 1.',qs:[Q('What is the article about?',['A company expansion','A merger','A product recall','A layoff'],0,'公司開設第二辦公室。'),Q('Who will work at the new office?',['Only managers','Sales trainees','Engineers and support staff','Part-time interns'],2,'mainly engineers and customer support staff。'),Q('What does Ellen Wu say?',['The app will be discontinued','Profits have fallen','Demand for the app is increasing','The company will move'],2,'growing demand for … app。')]},
+{s:'R',p:'Part 7 閱讀理解（九）',ps:'To: All Staff\nFrom: Human Resources\n\nBeginning next month, employees may work from home up to two days per week with supervisor approval. Requests must be submitted through the online portal at least three days in advance. Employees working remotely are expected to be available during core hours, 10 A.M. to 3 P.M.',qs:[Q('What is the memo about?',['A salary increase','A new office','A remote-work policy','A hiring plan'],2,'work from home 與申請規定。'),Q('How should employees request remote work?',['By emailing HR','Through an online portal','By calling a supervisor','In person'],1,'submitted through the online portal。'),Q('What are remote workers expected to do?',['Attend every meeting','Report daily by phone','Be available during core hours','Work only on Fridays'],2,'available during core hours。')]},
+{s:'R',p:'Part 7 閱讀理解（十）',ps:'Mia: Hi Jordan, did the client approve the new design?\nJordan: Almost. They want one change to the logo color.\nMia: Okay. Can you send the updated file by 4 P.M.? I need to print the banners tonight.\nJordan: Sure. I’ll email it as soon as I finish.',qs:[Q('What does the client want?',['A new logo color','A larger banner','A lower price','A different date'],0,'one change to the logo color。'),Q('Why does Mia need the file by 4 P.M.?',['To pay a bill','To print banners tonight','To meet the client','To update a website'],1,'print the banners tonight。'),Q('What will Jordan do?',['Call the client','Print the banners','Email the updated file','Visit the printer'],2,'I’ll email it。')]},
+{s:'R',p:'Part 7 閱讀理解（十一）',ps:'Riverside Seminar — Saturday, October 12\n\n9:00 Registration\n9:30 Keynote: The Future of Remote Work\n11:00 Workshop A: Time Management / Workshop B: Team Communication\n12:30 Lunch (included)\n2:00 Panel Discussion\n\nAttendees must choose one workshop when registering. Parking is free for attendees.',qs:[Q('What happens at 9:30?',['Registration','A keynote speech','A panel discussion','Lunch'],1,'9:30 Keynote。'),Q('What is included?',['Transportation','Books','Lunch','A hotel room'],2,'Lunch (included)。'),Q('What must attendees do when registering?',['Pay for parking','Choose one workshop','Submit a résumé','Bring a laptop'],1,'choose one workshop when registering。')]},
+{s:'R',p:'Part 7 閱讀理解（十二）',ps:'Dear Customer,\n\nThank you for your recent purchase of the AirPure air purifier. We are writing to confirm that your unit has shipped and should arrive within five business days. The filter should be replaced every six months. A replacement filter can be ordered at our website, and members receive a ten percent discount. Please register your product within thirty days to activate the warranty.',qs:[Q('What is the purpose of the message?',['To confirm a shipment','To request payment','To announce a recall','To offer a refund'],0,'your unit has shipped。'),Q('How often should the filter be replaced?',['Every month','Every three months','Every six months','Every year'],2,'replaced every six months。'),Q('What must customers do to activate the warranty?',['Pay a fee','Register the product','Call customer service','Replace the filter'],1,'register your product within thirty days。')]},
+{s:'R',p:'Part 7 閱讀理解（十三）',ps:'Annual Charity Run\n\nThe Greenway Charity Run will take place on Sunday, April 6, beginning at 8 A.M. at Central Park. Participants can choose a 5-kilometer or 10-kilometer route. The registration fee is 20 dollars, and all proceeds will support local children’s programs. Participants who register before March 20 will receive a free T-shirt. Volunteers are also needed; contact the organizers for details.',qs:[Q('Where will the run be held?',['At a stadium','On Riverside Road','At Central Park','At a school'],2,'at Central Park。'),Q('What will the money support?',['Local children’s programs','A new stadium','Park maintenance','Medical research'],0,'support local children’s programs。'),Q('Who will get a free T-shirt?',['All volunteers','Anyone who registers before March 20','The 10-km winners','The first 100 runners'],1,'register before March 20。')]}
+];
+let sec='L',checked=false,sub='all';const A={},D=new Set(),SUBS={L:['Part 2','Part 3','Part 4'],R:['Part 5','Part 6','Part 7']};
+const vis=g=>g.s===sec&&(sub==='all'||g.p.startsWith(sub));
+const ORDS={},QO={};
+const shuf=a=>{for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
+function ordList(){const base=G.map((_,i)=>i).filter(i=>vis(G[i]));return ORDS[sec+'|'+sub]||base}
+document.getElementById('shf').onclick=()=>{tok++;if(window.speechSynthesis)speechSynthesis.cancel();const base=G.map((_,i)=>i).filter(i=>vis(G[i])),by={};base.forEach(i=>{const p=G[i].p.slice(0,6);(by[p]=by[p]||[]).push(i)});ORDS[sec+'|'+sub]=Object.values(by).flatMap(a=>shuf(a));G.forEach((g,gi)=>{if(vis(g)&&!g.ps&&!g.au)QO[gi]=shuf(g.qs.map((_,i)=>i))});res.textContent='';render();window.scrollTo(0,0)};
+document.getElementById('ord').onclick=()=>{delete ORDS[sec+'|'+sub];G.forEach((g,gi)=>{if(vis(g))delete QO[gi]});render();window.scrollTo(0,0)};
+const SUBN=()=>sub==='all'?'全部':sub;
+function buildSub(){document.getElementById('psub').innerHTML=['all',...SUBS[sec]].map(s=>'<button data-s="'+s+'"'+(s===sub?' class="on"':'')+'>'+(s==='all'?'全部':s)+' ('+G.filter(g=>g.s===sec&&(s==='all'||g.p.startsWith(s))).reduce((a,g)=>a+g.qs.length,0)+')</button>').join('')}
+document.getElementById('psub').onclick=e=>{const b=e.target.closest('button');if(!b)return;sub=b.dataset.s;res.textContent='';buildSub();render();window.scrollTo(0,0)};
+const app=document.getElementById('app'),res=document.getElementById('res');
+function render(){
+ app.innerHTML='';let n=0;
+ ordList().forEach(gi=>{const g=G[gi];
+  const checked=D.has(gi);
+  const c=document.createElement('div');c.className='card';
+  let h='<div class="part">'+g.p+'</div>';
+  if(g.au)h+='<button data-play="'+gi+'">▶ 播放音檔</button>';
+  if(g.ps)h+='<div class="passage">'+g.ps+'</div>';
+  (QO[gi]||g.qs.map((_,i)=>i)).forEach(qi=>{const q=g.qs[qi];
+   const k=gi+'_'+qi;
+   n++;h+='<div class="q">'+n+'. '+(g.hide&&!checked?'請聽音檔後作答':q.q)+'</div>';
+   q.o.forEach((o,oi)=>{
+    let cl='opt';if(A[k]===oi)cl+=' sel';
+    if(checked){if(oi===q.a)cl+=' right';else if(A[k]===oi)cl+=' wrong'}
+    const lab='('+'ABCD'[oi]+') '+(g.hide&&!checked?'':o);
+    h+='<button class="'+cl+'" data-k="'+k+'" data-o="'+oi+'">'+lab+'</button>';
+   });
+   if(checked)h+='<div class="exp">解析：'+q.e+'</div>';
+  });
+  if(checked&&g.au&&!g.hide)h+='<div class="passage">'+g.au.map(x=>x[1]).join('\n')+'</div>';
+  c.innerHTML=h;app.appendChild(c);
+ });
+}
+let VS=[],tok=0,FV=[],MV=[],RV={};
+const NOV=/albert|bad news|bahh|bells|boing|bubbles|cellos|good news|jester|organ|superstar|trinoids|whisper|wobble|zarvox|princess|junior|kathy|ralph|fred|agnes|bruce|vicki/i,MN=/daniel|alex|tom|oliver|david|mark|guy|ryan|eric|roger|aaron|arthur|evan|nathan|rishi|gordon|reed|eddy|rocko|grandpa|brian|james|george|alfred|\bmale\b/i,FN=/samantha|karen|moira|tessa|fiona|victoria|allison|ava|susan|zira|aria|jenny|kate|serena|sandy|shelley|flo|grandma|nicky|libby|sonia|michelle|emma|joanna|salli|kimberly|ivy|amy|nora|google us english|female/i;
+function gd(v){const n=v.name;if(NOV.test(n))return '';if(/female/i.test(n))return 'F';if(MN.test(n))return 'M';if(FN.test(n))return 'F';return ''}
+function rv(k,sp){const L=sp==='M'?MV:FV;if(!L.length)return VS[sp==='M'&&VS[1]?1:0];RV[k]=RV[k]||{};return RV[k][sp]||(RV[k][sp]=L[Math.floor(Math.random()*L.length)])}
+function sc(v){let s=0;if(/natural|online|neural|premium|enhanced/i.test(v.name))s+=4;if(/google us|samantha|aria|jenny|guy|ava|zira|david|mark|daniel|alex|ryan|eric/i.test(v.name))s+=2;if(/^en[-_]US/i.test(v.lang))s+=1;return s}
+function loadV(){
+ const all=speechSynthesis.getVoices().filter(v=>/^en/i.test(v.lang)&&!NOV.test(v.name)).sort((a,b)=>sc(b)-sc(a));
+ if(!all.length||all.length===VS.length)return;
+ VS=all;
+ const fill=id=>{document.getElementById(id).innerHTML='<option value="r" selected>🎲 隨機</option>'+VS.map((v,i)=>'<option value="'+i+'">'+v.name+'</option>').join('')};
+ const mi=VS.findIndex(v=>/male|guy|david|mark|daniel|alex|tom|james|ryan|eric|roger/i.test(v.name)&&!/female/i.test(v.name));
+ const wi=VS.findIndex(v=>/female|samantha|aria|jenny|ava|zira|karen|allison|susan/i.test(v.name));
+ fill('vW');fill('vM');FV=VS.filter(v=>gd(v)==='F');MV=VS.filter(v=>gd(v)==='M');
+}
+function say(lines,key,done){
+ const my=++tok;speechSynthesis.cancel();
+ let i=0;
+ const next=()=>{
+  if(my!==tok)return;
+  if(i>=lines.length){done&&done();return}
+  const [sp,t]=lines[i++];
+  const u=new SpeechSynthesisUtterance(t);u.lang='en-US';
+  u.rate=+document.getElementById('rt').value;u.pitch=1;u.volume=1;
+  const sel=document.getElementById(sp==='M'?'vM':'vW').value;const v=sel==='r'?rv(key,sp):VS[+sel];
+  if(v){u.voice=v;u.lang=v.lang}
+  u.onend=()=>setTimeout(next,700);u.onerror=()=>setTimeout(next,300);
+  speechSynthesis.speak(u);
+ };
+ next();
+}
+const SW={};
+function speak(g,gi){let l=g.au;if(/^Part (2|4)/.test(g.p)&&!g.au.some(x=>/This is Julia/.test(x[1]))){if(SW[gi]===undefined)SW[gi]=Math.random()<.5;if(SW[gi])l=l.map(([s,t])=>[s==='W'?'M':'W',t])}say(l,gi)}
+document.getElementById('tst').onclick=()=>{delete RV.test;say([['W','Hello. This is a test of the listening voice.'],['M','Can you hear me clearly?']],'test')};
+app.addEventListener('click',e=>{
+ const b=e.target.closest('button');if(!b)return;
+ if(b.dataset.play!==undefined){speak(G[b.dataset.play],b.dataset.play);return}
+ if(b.dataset.k&&!D.has(+b.dataset.k.split('_')[0])){A[b.dataset.k]=+b.dataset.o;render()}
+});
+function setSec(s){sec=s;sub='all';res.textContent='';buildSub();document.getElementById('tL').classList.toggle('on',s==='L');document.getElementById('tR').classList.toggle('on',s==='R');render()}
+document.getElementById('tL').onclick=()=>setSec('L');
+document.getElementById('tR').onclick=()=>setSec('R');
+document.getElementById('chk').onclick=()=>{
+ let t=0,r={L:[0,0],R:[0,0]};G.forEach((g,gi)=>{if(vis(g))D.add(gi)});
+ G.forEach((g,gi)=>vis(g)&&g.qs.forEach((q,qi)=>{r[g.s][1]++;if(A[gi+'_'+qi]===q.a)r[g.s][0]++}));
+ res.textContent='聽力 '+r.L[0]+'/'+r.L[1]+'　閱讀 '+r.R[0]+'/'+r.R[1]+'　合計 '+(r.L[0]+r.R[0])+'/'+(r.L[1]+r.R[1]);
+ res.textContent=SUBN()+'　答對 '+(r.L[0]+r.R[0])+' / '+(r.L[1]+r.R[1])+' 題';render();
+};
+document.getElementById('rst').onclick=()=>{tok++;speechSynthesis.cancel();G.forEach((g,gi)=>{if(vis(g)){D.delete(gi);delete SW[gi];delete RV[gi];g.qs.forEach((q,qi)=>delete A[gi+'_'+qi])}});res.textContent='';render();window.scrollTo(0,0)};
+if(window.speechSynthesis){speechSynthesis.onvoiceschanged=loadV;loadV()}
+buildSub();render();
+</script>
+</body>
+</html>
