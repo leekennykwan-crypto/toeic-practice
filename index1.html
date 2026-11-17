@@ -228,32 +228,38 @@ function render(){
   c.innerHTML=h;app.appendChild(c);
  });
 }
-let VS=[],tok=0,FV=[],MV=[],RV={};
-const NOV=/albert|bad news|bahh|bells|boing|bubbles|cellos|good news|jester|organ|superstar|trinoids|whisper|wobble|zarvox|princess|junior|kathy|ralph|fred|agnes|bruce|vicki|eddy|flo|grandma|grandpa|reed|rocko|sandy|shelley|eloquence|compact/i,MN=/daniel|alex|tom|oliver|david|mark|guy|ryan|eric|roger|aaron|arthur|evan|nathan|rishi|gordon|reed|eddy|rocko|grandpa|brian|james|george|alfred|\bmale\b/i,FN=/samantha|karen|moira|tessa|fiona|victoria|allison|ava|susan|zira|aria|jenny|kate|serena|sandy|shelley|flo|grandma|nicky|libby|sonia|michelle|emma|joanna|salli|kimberly|ivy|amy|nora|google us english|female/i;
+let VS=[],tok=0,FV=[],MV=[],RV={},LN=0;
+const NOV=/albert|bad news|bahh|bells|boing|bubbles|cellos|good news|jester|organ|superstar|trinoids|whisper|wobble|zarvox|princess|junior|kathy|ralph|fred|agnes|bruce|vicki|victoria|eddy|flo|grandma|grandpa|reed|rocko|sandy|shelley|eloquence|compact/i,MN=/daniel|alex|tom|oliver|david|mark|guy|ryan|eric|roger|aaron|arthur|evan|nathan|rishi|gordon|reed|eddy|rocko|grandpa|brian|james|george|alfred|lee|liam|jacob|harry|matthew|joey|justin|kevin|russell|william|ravi|hamish|ethan|noah|mike|thomas|steffan|brandon|christopher|ronald|jim|\bmale\b/i,FN=/samantha|karen|moira|tessa|fiona|victoria|allison|ava|susan|zira|aria|jenny|kate|serena|sandy|shelley|flo|grandma|nicky|libby|sonia|michelle|emma|joanna|salli|kimberly|ivy|amy|nora|google us english|female/i;
+const WF=new Set(['tessa','allison','ava','nicky','samantha','susan','kate','serena','stephanie','fiona','moria','moira','karen','matilda']),WM=new Set(['evan','nathan','tom','lee','daniel','jamie','oliver']);
+const bn=v=>v.name.replace(/\s*[(（].*$/,'').trim().toLowerCase();
 function gd(v){const n=v.name;if(NOV.test(n))return '';if(/female/i.test(n))return 'F';if(MN.test(n))return 'M';if(FN.test(n))return 'F';return ''}
 function rv(k,sp){const L=sp==='M'?MV:FV;if(!L.length)return VS[sp==='M'&&VS[1]?1:0];RV[k]=RV[k]||{};return RV[k][sp]||(RV[k][sp]=L[Math.floor(Math.random()*L.length)])}
-function sc(v){let s=0;if(/natural|online|neural|premium|enhanced/i.test(v.name))s+=4;if(/google us|samantha|aria|jenny|guy|ava|zira|david|mark|daniel|alex|ryan|eric/i.test(v.name))s+=2;if(/^en[-_]US/i.test(v.lang))s+=1;return s}
+function sc(v){let s=0;if(/natural|online|neural|premium|enhanced|增強|增强|進階|優質|优质/i.test(v.name))s+=4;if(/google us|samantha|aria|jenny|guy|ava|zira|david|mark|daniel|alex|ryan|eric/i.test(v.name))s+=2;if(/^en[-_]US/i.test(v.lang))s+=1;return s}
 function loadV(){
  const all=speechSynthesis.getVoices().filter(v=>/^en/i.test(v.lang)&&!NOV.test(v.name)).sort((a,b)=>sc(b)-sc(a));
- if(!all.length||all.length===VS.length)return;
+ if(!all.length||all.length===LN)return;LN=all.length;
  VS=all;
- const fill=id=>{document.getElementById(id).innerHTML='<option value="r" selected>🎲 隨機</option>'+VS.map((v,i)=>'<option value="'+i+'">'+v.name+'</option>').join('')};
+ const fill=(id,L)=>{document.getElementById(id).innerHTML='<option value="r" selected>🎲 隨機</option>'+L.map((v,i)=>'<option value="'+i+'">'+v.name+'</option>').join('')};
  const mi=VS.findIndex(v=>/male|guy|david|mark|daniel|alex|tom|james|ryan|eric|roger/i.test(v.name)&&!/female/i.test(v.name));
  const wi=VS.findIndex(v=>/female|samantha|aria|jenny|ava|zira|karen|allison|susan/i.test(v.name));
- fill('vW');fill('vM');FV=VS.filter(v=>gd(v)==='F');MV=VS.filter(v=>gd(v)==='M');
+ const pk=S=>{const m=new Map();VS.forEach(v=>{const b=bn(v);if(S.has(b)&&!m.has(b))m.set(b,v)});return [...m.values()]};
+FV=pk(WF);MV=pk(WM);
+if(!FV.length)FV=VS.filter(v=>gd(v)==='F');if(!MV.length)MV=VS.filter(v=>gd(v)==='M');
+fill('vW',FV);fill('vM',MV);
 }
-const VN={};
-function pv(sp,key){const sel=document.getElementById(sp==='M'?'vM':'vW').value;return sel==='r'?rv(key,sp):VS[+sel]}
+const VN={},RP={};
+function pt(k,sp){RP[k]=RP[k]||{};return RP[k][sp]||(RP[k][sp]=[0.88,0.94,1][Math.floor(Math.random()*3)])}
+function pv(sp,key){const sel=document.getElementById(sp==='M'?'vM':'vW').value;return sel==='r'?rv(key,sp):(sp==='M'?MV:FV)[+sel]}
 function say(lines,key,done){
  const my=++tok;speechSynthesis.cancel();
- const us={};lines.forEach(([sp])=>{const v=pv(sp,key);if(v)us[sp]=v.name});const txt='使用聲音：'+['W','M'].filter(s=>us[s]).map(s=>(s==='W'?'女聲 ':'男聲 ')+us[s]).join('｜');VN[key]=txt;const el=document.getElementById('vn'+key);if(el)el.textContent=txt;
+ const us={};lines.forEach(([sp])=>{const v=pv(sp,key);if(v)us[sp]=v.name});const txt='使用聲音：'+['W','M'].filter(s=>us[s]).map(s=>(s==='W'?'女聲 ':'男聲 ')+us[s]+(s==='M'&&document.getElementById('vM').value==='r'?'（音調 '+pt(key,'M')+'）':'')).join('｜');VN[key]=txt;const el=document.getElementById('vn'+key);if(el)el.textContent=txt;
  let i=0;
  const next=()=>{
   if(my!==tok)return;
   if(i>=lines.length){done&&done();return}
   const [sp,t]=lines[i++];
   const u=new SpeechSynthesisUtterance(t);u.lang='en-US';
-  u.rate=+document.getElementById('rt').value;u.pitch=1;u.volume=1;
+  u.rate=+document.getElementById('rt').value;u.pitch=(sp==='M'&&document.getElementById('vM').value==='r')?pt(key,'M'):1;u.volume=1;
   const v=pv(sp,key);
   if(v){u.voice=v;u.lang=v.lang}
   u.onend=()=>setTimeout(next,700);u.onerror=()=>setTimeout(next,300);
@@ -278,7 +284,7 @@ document.getElementById('chk').onclick=()=>{
  res.textContent='聽力 '+r.L[0]+'/'+r.L[1]+'　閱讀 '+r.R[0]+'/'+r.R[1]+'　合計 '+(r.L[0]+r.R[0])+'/'+(r.L[1]+r.R[1]);
  res.textContent=SUBN()+'　答對 '+(r.L[0]+r.R[0])+' / '+(r.L[1]+r.R[1])+' 題';render();
 };
-document.getElementById('rst').onclick=()=>{tok++;speechSynthesis.cancel();G.forEach((g,gi)=>{if(vis(g)){D.delete(gi);delete SW[gi];delete RV[gi];delete VN[gi];g.qs.forEach((q,qi)=>delete A[gi+'_'+qi])}});res.textContent='';render();window.scrollTo(0,0)};
+document.getElementById('rst').onclick=()=>{tok++;speechSynthesis.cancel();G.forEach((g,gi)=>{if(vis(g)){D.delete(gi);delete SW[gi];delete RV[gi];delete RP[gi];delete VN[gi];g.qs.forEach((q,qi)=>delete A[gi+'_'+qi])}});res.textContent='';render();window.scrollTo(0,0)};
 if(window.speechSynthesis){speechSynthesis.onvoiceschanged=loadV;loadV()}
 buildSub();render();
 </script>
