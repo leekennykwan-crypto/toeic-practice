@@ -28,7 +28,7 @@ button.on,button.pri{background:var(--ac);color:#fff;border-color:var(--ac)}
 .exp{font-size:.9rem;color:var(--mut);margin:4px 0 0}
 .bar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:16px 0}
 #res{font-weight:700}
-.note{font-size:.8rem;color:var(--mut)}select{font:inherit;background:var(--card);color:var(--tx);border:1px solid var(--bd);border-radius:8px;padding:6px;max-width:100%}.ctl{display:flex;gap:8px;flex-wrap:wrap;align-items:center;font-size:.85rem}.ptabs{display:flex;gap:6px;flex-wrap:wrap;margin:4px 0 8px}.ptabs button{padding:5px 10px;font-size:.85rem}.vnote{font-size:.8rem;color:var(--mut);margin:6px 0 0;min-height:1em}.ph{display:block;max-width:100%;border-radius:8px;margin:8px 0}
+.note{font-size:.8rem;color:var(--mut)}select{font:inherit;background:var(--card);color:var(--tx);border:1px solid var(--bd);border-radius:8px;padding:6px;max-width:100%}.ctl{display:flex;gap:8px;flex-wrap:wrap;align-items:center;font-size:.85rem}.ptabs{display:flex;gap:6px;flex-wrap:wrap;margin:4px 0 8px}.ptabs button{padding:5px 10px;font-size:.85rem}.vnote{font-size:.8rem;color:var(--mut);margin:6px 0 0;min-height:1em}.dlab{font-size:.8rem;font-weight:600;color:var(--mut);margin:10px 0 -4px}.ph{display:block;max-width:100%;border-radius:8px;margin:8px 0}
 </style>
 </head>
 <body>
@@ -40,6 +40,7 @@ button.on,button.pri{background:var(--ac);color:#fff;border-color:var(--ac)}
 <div class="tabs"><button id="tL" class="on">聽力 Listening</button><button id="tR">閱讀 Reading</button></div>
 <div class="ptabs" id="psub"></div>
 <div class="card ctl" id="vctl" style="display:none"><label>類別 <select id="vc"></select></label><label>單字題數 <select id="vn"><option value="5">5 題</option><option value="10" selected>10 題</option><option value="20">20 題</option></select></label><button class="pri" id="vgo">開始練習</button><span class="note">每次從單字庫隨機抽題，答完最後一題會自動顯示答案。</span></div>
+<div class="card ctl" id="tctl" style="display:none"><span>Part 5 30 題｜Part 6 16 題｜Part 7 單篇 29 題｜多篇 25 題</span><button class="pri" id="tgo">🎲 重新抽題</button></div>
 <div id="app"></div>
 <div class="bar"><button class="pri" id="chk">對答案</button><button id="rst">重新作答</button><span id="res"></span></div>
 <p class="note">實際考試每段錄音只播放一次；此處可重複播放，想模擬考場請自己只聽一次。</p>
@@ -235,6 +236,679 @@ Q('The two companies agreed to ______ their efforts to develop the new technolog
 {s:'R',p:'Part 7 閱讀理解（十二）',ps:'Dear Customer,\n\nThank you for your recent purchase of the AirPure air purifier. We are writing to confirm that your unit has shipped and should arrive within five business days. The filter should be replaced every six months. A replacement filter can be ordered at our website, and members receive a ten percent discount. Please register your product within thirty days to activate the warranty.',qs:[Q('What is the purpose of the message?',['To confirm a shipment','To request payment','To announce a recall','To offer a refund'],0,'your unit has shipped。'),Q('How often should the filter be replaced?',['Every month','Every three months','Every six months','Every year'],2,'replaced every six months。'),Q('What must customers do to activate the warranty?',['Pay a fee','Register the product','Call customer service','Replace the filter'],1,'register your product within thirty days。')]},
 {s:'R',p:'Part 7 閱讀理解（十三）',ps:'Annual Charity Run\n\nThe Greenway Charity Run will take place on Sunday, April 6, beginning at 8 A.M. at Central Park. Participants can choose a 5-kilometer or 10-kilometer route. The registration fee is 20 dollars, and all proceeds will support local children’s programs. Participants who register before March 20 will receive a free T-shirt. Volunteers are also needed; contact the organizers for details.',qs:[Q('Where will the run be held?',['At a stadium','On Riverside Road','At Central Park','At a school'],2,'at Central Park。'),Q('What will the money support?',['Local children’s programs','A new stadium','Park maintenance','Medical research'],0,'support local children’s programs。'),Q('Who will get a free T-shirt?',['All volunteers','Anyone who registers before March 20','The 10-km winners','The first 100 runners'],1,'register before March 20。')]}
 ];
+// ===== 新增 Part 6 段落填空（公告／信件／郵件／新聞稿 各 3 篇）=====
+const F={road:['告示牌','Road sign'],manual:['產品使用說明書','Product instructions'],article:['報紙文章','Article'],text:['通訊軟體對話','Text-message chain'],instr:['指示','Instructions'],notice:['公告','Notice'],letter:['信件','Letter'],email:['郵件','E-mail'],press:['新聞稿','Press release'],web:['網頁','Web page']};
+let RB=0;const SEQ=/\d|day\b|January|February|March|April|May|June|July|August|September|October|November|December|Standard|None of/;
+const bal=qs=>qs.map(q=>{if(q.a!==1||q.o.some(o=>SEQ.test(o))||RB++%2===0)return q;const o=q.o.slice();[o[1],o[3]]=[o[3],o[1]];return Q(q.q,o,3,q.e)});
+const P6=(f,ps,qs)=>({s:'R',p:'Part 6 段落填空｜'+F[f][0]+' '+F[f][1],ps,qs:bal(qs)});
+const S7=(f,ps,qs)=>({s:'R',p:'Part 7 單篇閱讀｜'+F[f][0]+' '+F[f][1],ps,qs:bal(qs)});
+const M7=(docs,qs)=>({s:'R',p:'Part 7 多篇閱讀｜'+docs.map(d=>F[d[0]][0]).join('＋'),m:1,docs:docs.map((d,i)=>['文件 '+(i+1)+'｜'+F[d[0]][0]+' '+F[d[0]][1],d[1]]),qs:bal(qs)});
+G.push(
+P6('notice',`NOTICE TO ALL RESIDENTS
+
+The passenger elevators in Maple Tower will be (1)______ out of service on Thursday, March 12, from 9:00 A.M. to 3:00 P.M. while technicians install new safety equipment. During this time, residents are asked to use the stairs or the freight elevator located near the loading dock. (2)______ We understand that this may be inconvenient, especially for residents on the upper floors. Management thanks you for your (3)______.`,[
+Q("空格 (1)",["temporary","temporarily","temporariness","temporaries"],1,"修飾 out of service 這個片語要用副詞 temporarily「暫時地」。"),
+Q("空格 (2)",["The freight elevator will be available to residents throughout the day.","The new safety equipment was purchased overseas.","Rent payments are due on the first of each month.","The building opened more than twenty years ago."],0,"前一句提到可以改搭貨梯，接著說明貨梯整天都可使用，語意最連貫。"),
+Q("空格 (3)",["patient","patiently","patience","patients"],2,"your 後面接名詞，thank you for your patience 是公告常用結尾。")]),
+P6('notice',`Riverside Community Center
+
+Registration for our summer art workshops (1)______ on Monday, May 4. Classes are open to residents of all ages, and no previous experience is required. Space is limited to fifteen participants per class, so we recommend signing up early. (2)______, all materials will be provided free of charge. To register, visit the front desk or complete the form on our website.`,[
+Q("空格 (1)",["opening","to open","opens","have opened"],2,"主詞 Registration 是單數，已排定的時程可用現在簡單式 opens。"),
+Q("空格 (2)",["However","In addition","Otherwise","Instead"],1,"前面講課程優點，再補充「材料免費」，用 In addition「此外」。")]),
+P6('notice',`Notice: New Recycling Procedures
+
+Starting next Monday, the office will (1)______ a new recycling system. Separate bins for paper, plastic, and glass have been placed in the kitchen on each floor. Please rinse all containers before (2)______ them in the bins. Items that are not sorted correctly cannot be collected by the city. (3)______ If you have questions, contact Grace Liu in Facilities.`,[
+Q("空格 (1)",["adopt","adoption","adopted","adopting"],0,"will 後面接原形動詞 adopt「採用」。"),
+Q("空格 (2)",["place","placed","placing","to place"],2,"介系詞 before 後面接動名詞 placing。"),
+Q("空格 (3)",["A guide explaining what goes in each bin is posted above the sink.","The kitchen will be painted next year.","Glass is heavier than plastic.","Employees enjoyed the holiday party."],0,"前文強調要正確分類，接著說明水槽上方貼有分類指南，最合理。")]),
+P6('letter',`Dear Mr. Harlow,
+
+Thank you for opening an account with Westbrook Savings Bank. Your new debit card will be mailed to you (1)______ the next seven to ten business days. For your security, the card will arrive inactive. To activate it, please call the number printed on the sticker attached to the card. (2)______ you have activated your card, you may begin using it at any of our ATMs.
+
+Sincerely,
+Laura Chen
+Customer Relations`,[
+Q("空格 (1)",["within","between","until","along"],0,"within the next seven to ten business days「在接下來 7 到 10 個工作天內」。"),
+Q("空格 (2)",["Unless","Although","Once","Whereas"],2,"Once「一旦」：一旦開卡就可以使用，語意最通順。")]),
+P6('letter',`Dear Dr. Morales,
+
+On behalf of the Pacific Logistics Association, I am writing to invite you to speak at our annual conference in Vancouver on September 18. Your recent research on warehouse automation has been (1)______ discussed among our members. We would be honored if you could deliver a thirty-minute talk on the topic. (2)______ The association will cover your travel and accommodation expenses. Please let us know by July 1 (3)______ you are able to attend.
+
+Warm regards,
+Kevin Ostrander
+Program Chair`,[
+Q("空格 (1)",["wide","widely","widen","width"],1,"修飾過去分詞 discussed 要用副詞 widely「廣泛地」。"),
+Q("空格 (2)",["Vancouver is famous for its mild weather.","Our members pay an annual fee.","The conference was canceled last year.","A question-and-answer session will follow your presentation."],3,"前一句講 30 分鐘演講，接著說明演講後有問答時間，內容最相關。"),
+Q("空格 (3)",["whether","what","which","who"],0,"let us know whether「告訴我們是否」能出席。")]),
+P6('letter',`Dear Ms. Patel,
+
+We have received the coffee maker you returned for repair under warranty. Our technicians found that the heating element was (1)______ and have replaced it at no cost to you. The unit has been tested and is working properly. It will be shipped back to you by express mail, and you should receive it by Friday. Please accept the enclosed coupon for 15 percent off your next purchase as a token of our (2)______.
+
+Best regards,
+Northfield Appliances Service Center`,[
+Q("空格 (1)",["defect","defective","defectively","defecting"],1,"be 動詞 was 後面接形容詞 defective「有瑕疵的」。"),
+Q("空格 (2)",["appreciate","appreciative","appreciation","appreciatively"],2,"our 後面接名詞，as a token of our appreciation「聊表謝意」。")]),
+P6('email',`To: All Staff
+From: Office Administration
+Date: April 2
+Subject: New Room Booking System
+
+Dear colleagues,
+
+Beginning April 9, all meeting rooms must be reserved through the new online booking system. Paper sign-up sheets will no longer be (1)______. The system allows you to see which rooms are available and to book them up to one month in advance. (2)______ A short video tutorial is available on the intranet. Please contact the help desk if you are unable to log in.
+
+Thank you,
+Office Administration`,[
+Q("空格 (1)",["accept","accepted","accepting","acceptance"],1,"will no longer be + 過去分詞，被動語態 accepted「被接受」。"),
+Q("空格 (2)",["The cafeteria serves lunch from noon.","Our office moved here in 2019.","You will also receive a reminder email one hour before your meeting.","Several rooms have large windows."],2,"前一句介紹系統功能，接著補充「會議前一小時寄提醒信」，同樣在講系統功能。")]),
+P6('email',`To: orders@brightpaper.example
+From: Daniel Kwon <dkwon@lumenprint.example>
+Subject: Order #5531
+
+Hello,
+
+I would like to make a change to our order #5531, which was placed on Monday. Instead of 40 boxes of A4 paper, we now need 60 boxes, as we have received a large printing job from a new client. Could you please let me know (1)______ the additional boxes can be delivered together with the rest of the order on Thursday? If this is not possible, a (2)______ delivery early next week would also be acceptable. (3)______
+
+Best regards,
+Daniel Kwon
+Purchasing Manager, Lumen Print`,[
+Q("空格 (1)",["whether","unless","because","although"],0,"let me know whether「告訴我是否」可以一起送達。"),
+Q("空格 (2)",["separately","separate","separation","separates"],1,"冠詞 a 和名詞 delivery 之間放形容詞 separate「另外的」。"),
+Q("空格 (3)",["Our company was founded in 1998.","Paper prices fell sharply last year.","The client lives overseas.","I look forward to hearing from you."],3,"商業郵件結尾常用 I look forward to hearing from you。")]),
+P6('email',`To: New Employees
+From: Jessica Moore, Human Resources
+Subject: Orientation Reminder
+
+Welcome to Halden Engineering! This is a reminder that orientation will take place on Monday, June 3, in the second-floor training room. The session will begin (1)______ at 9:00 A.M., so please arrive at least ten minutes early to collect your ID badge. Lunch will be provided. (2)______, you will meet your department managers and tour the facility.`,[
+Q("空格 (1)",["promptness","prompt","prompted","promptly"],3,"修飾動詞 begin 要用副詞 promptly「準時地」。"),
+Q("空格 (2)",["In the afternoon","Even so","For example","By contrast"],0,"上午報到、中午用餐，接著說下午的行程，用 In the afternoon 最自然。")]),
+P6('press',`FOR IMMEDIATE RELEASE
+
+SEOUL, October 3: Novatek Electronics today announced the launch of the Aero X, its (1)______ wireless earbuds to date. The new model offers up to twelve hours of battery life on a single charge and features improved noise cancellation. (2)______ The Aero X will be available in stores and online beginning October 20 at a price of $149. Customers who pre-order before October 15 will (3)______ a free charging case.`,[
+Q("空格 (1)",["light","lighter","lightest","lightly"],2,"its ... to date「迄今為止最……的」要用最高級 lightest。"),
+Q("空格 (2)",["According to the company, the earbuds weigh only four grams each.","Novatek also plans to close two factories.","Seoul is the capital of South Korea.","Many people prefer wired headphones."],0,"前面介紹產品特色，接著補充重量資訊，也呼應空格 (1) 的「最輕」。"),
+Q("空格 (3)",["receipt","receive","receiving","received"],1,"will 後面接原形動詞 receive。")]),
+P6('press',`FOR IMMEDIATE RELEASE
+Contact: Amanda Reyes, Media Relations, 555-0182
+
+Coral Bay Resorts to Open First Property in Taiwan
+
+KAOHSIUNG, May 12: Coral Bay Resorts announced today that it will open a 220-room hotel in Kaohsiung next spring. The hotel will be located near the harbor and will feature three restaurants, a rooftop pool, and a conference center (1)______ of hosting up to 500 guests. "Taiwan has become one of the fastest-growing travel markets in Asia," said CEO Martin Hale. (2)______ the hotel opens, the company expects to hire approximately 300 local employees.`,[
+Q("空格 (1)",["capable","able","possible","skilled"],0,"be capable of + V-ing「有能力……」，這裡省略 which is。able 要接 to。"),
+Q("空格 (2)",["During","Despite","Before","Unless"],2,"Before 後面接子句，「在飯店開幕前」先招募員工。During 和 Despite 後面不能接子句。")]),
+P6('press',`FOR IMMEDIATE RELEASE
+
+Greenleaf Foods Wins National Sustainability Award
+
+PORTLAND, August 8: Greenleaf Foods has been named the winner of this year's National Sustainability Award for its efforts to reduce packaging waste. Over the past two years, the company has (1)______ plastic packaging by 40 percent by switching to paper-based materials. "We are proud of what our team has achieved," said founder Rosa Delgado. The award will be presented at a ceremony in Washington on September 14. (2)______, Greenleaf plans to eliminate plastic from all of its products by 2030.`,[
+Q("空格 (1)",["reduce","reduced","reducing","reduction"],1,"has + 過去分詞構成現在完成式 has reduced。"),
+Q("空格 (2)",["In the past","Previously","Looking ahead","Instead"],2,"後面講 2030 年的計畫，用 Looking ahead「展望未來」。")])
+);
+
+// ===== 新增 Part 7 單篇閱讀（10 種模式 × 2 篇）=====
+G.push(
+S7('road',`ROAD WORK AHEAD
+Harbor Boulevard | Northbound Lanes
+
+Lane closures: Monday–Friday, 9:00 P.M. – 5:00 A.M.
+June 2 – June 27
+
+Expect delays of up to 20 minutes.
+Trucks over 10 tons: use Route 17 detour.
+Speed limit in work zone: 30 km/h
+Fines doubled when workers are present.
+
+City of Westport Public Works | Info: 555-0140`,[
+Q("When will the lanes be closed?",["During the morning rush hour","Overnight on weekdays","All day on weekends","Only on June 27"],1,"Monday–Friday, 9:00 P.M. – 5:00 A.M.，平日夜間封閉。"),
+Q("Who is advised to use Route 17?",["Bus drivers","Cyclists","Heavy trucks","All visitors"],2,"Trucks over 10 tons: use Route 17 detour，重型卡車改道。"),
+Q("What is indicated about fines?",["They are higher when workers are present.","They are paid online only.","They apply only to trucks.","They will be canceled after June."],0,"Fines doubled when workers are present，有工人在場時罰款加倍。")]),
+S7('road',`VISITOR PARKING: LOT C
+Northgate Business Park
+
+• 2-hour limit, 8:00 A.M. – 6:00 P.M., Mon–Fri
+• Free parking after 6:00 P.M. and on weekends
+• Visitors must display a permit from the reception desk in Building A
+• Spaces marked "EV" are reserved for electric vehicles while charging
+• Vehicles parked without a permit will be towed at owner's expense`,[
+Q("Where can visitors get a permit?",["At a machine in Lot C","At the reception desk in Building A","From a security guard","Online"],1,"a permit from the reception desk in Building A。"),
+Q("What is true about parking on Saturdays?",["It is limited to two hours.","It requires a payment.","It is free.","It is not allowed."],2,"Free parking after 6:00 P.M. and on weekends，週末免費。")]),
+S7('manual',`QuickBoil 1.7L Electric Kettle: Instructions for Use
+
+1. Before first use, fill the kettle to the MAX line, boil, and discard the water. Repeat twice.
+2. Place the kettle on its base and press the switch down. The blue light indicates that the kettle is heating.
+3. The kettle will switch off automatically when the water boils.
+4. Never operate the kettle with less water than the MIN line.
+5. To remove mineral build-up, boil a mixture of equal parts water and white vinegar once a month.
+
+Warranty: 2 years from date of purchase. Keep your receipt.`,[
+Q("What should users do before using the kettle for the first time?",["Clean it with vinegar","Boil water and throw it away several times","Register the product","Charge the base"],1,"第 1 點：裝水煮沸後倒掉，重複兩次。"),
+Q("What does the blue light show?",["The water is boiling.","The kettle is empty.","The kettle is heating.","The warranty has expired."],2,"The blue light indicates that the kettle is heating。"),
+Q("How often should the kettle be cleaned with vinegar?",["Once a week","Once a month","Every two months","Once a year"],1,"第 5 點：once a month。")]),
+S7('manual',`Setting Up Your PrintEase M20
+
+Step 1: Remove all orange tape and packing material from the printer.
+Step 2: Insert the ink cartridges. The printer will print an alignment page automatically.
+Step 3: Download the PrintEase app on your phone or computer and select "Add Printer."
+Step 4: Press and hold the Wi-Fi button for five seconds until the light flashes.
+
+Note: The printer supports 2.4 GHz networks only. If setup fails, restart your router and repeat Step 4. For further help, visit support.printease.example.`,[
+Q("What happens after the cartridges are inserted?",["The Wi-Fi light flashes.","The printer restarts.","The app opens automatically.","An alignment page is printed."],3,"Step 2：裝好墨水匣後會自動印出校正頁。"),
+Q("What should users do if setup fails?",["Return the printer","Switch to a 5 GHz network","Restart the router and try again","Replace the cartridges"],2,"If setup fails, restart your router and repeat Step 4。注意只支援 2.4 GHz。")]),
+S7('article',`Local Bakery Expands with Online Orders
+By Helen Ma, Staff Writer
+
+CRESTVIEW: Sunny Oven Bakery, a family-run business on Pine Street since 1987, has launched an online ordering service. Customers can now order bread, cakes, and pastries through the bakery's website and pick them up the next morning. Owner Victor Lam said the idea came from regular customers who wanted to skip the long morning lines. "On weekends, people were waiting thirty minutes or more," Mr. Lam explained. The bakery has also hired four additional staff members to handle the increase in orders. Delivery service is expected to begin later this year.`,[
+Q("What is the article mainly about?",["A bakery's new service","A new bakery opening","A change of ownership","A food safety inspection"],0,"文章主旨是麵包店推出線上訂購服務。"),
+Q("Why did Mr. Lam start the service?",["To reduce costs","To respond to customers' requests","To compete with a new store","To sell more cakes"],1,"the idea came from regular customers who wanted to skip the long morning lines。"),
+Q("What is suggested about delivery?",["It is already available.","It costs extra.","It is not yet offered.","It is limited to weekends."],2,"Delivery service is expected to begin later this year，代表目前還沒有。")]),
+S7('article',`Transit Authority Reports Record Ridership
+
+The Metro Transit Authority announced on Monday that ridership on its subway and bus lines reached a record 48 million trips last year, an increase of 12 percent over the previous year. Officials credit the growth to the opening of the Green Line extension in March and the introduction of a monthly pass that offers unlimited rides for $60. However, the authority also noted that rush-hour crowding has become a concern. To address the problem, it plans to add 30 new train cars by the end of next year.`,[
+Q("According to the article, what contributed to the increase in ridership?",["Lower gas prices","A subway line extension","Free weekend rides","A new bus station"],1,"credit the growth to the opening of the Green Line extension。"),
+Q("What problem is mentioned?",["Rising ticket prices","A shortage of drivers","Crowding at busy times","Frequent delays"],2,"rush-hour crowding has become a concern。"),
+Q("What does the authority plan to do?",["Add more train cars","Raise the price of the monthly pass","Build a new line","Hire more staff"],0,"plans to add 30 new train cars。")]),
+S7('text',`Kenji Sato [10:12 A.M.]
+Hi Rachel, I'm at the Fairmont Hotel for the client lunch, but the reservation is under your name and they can't find it.
+
+Rachel Owens [10:14 A.M.]
+That's strange. I booked it last Friday. Did you check the Garden Room?
+
+Kenji Sato [10:15 A.M.]
+Yes, they said that room is booked by another company today.
+
+Rachel Owens [10:18 A.M.]
+Oh no, I think I booked the Fairmont on Grand Avenue, not the one downtown.
+
+Kenji Sato [10:19 A.M.]
+That explains it. It's only 15 minutes away. I'll let the clients know.
+
+Rachel Owens [10:20 A.M.]
+Sorry about that! I'll call the restaurant and tell them you're on your way.`,[
+Q("What problem does Mr. Sato have?",["He is late for a flight.","He cannot find a reservation.","He forgot a document.","His client canceled lunch."],1,"飯店找不到用 Rachel 名字訂的位子。"),
+Q("At 10:19 A.M., what does Mr. Sato mean when he writes, \"That explains it\"?",["He understands why the reservation was not found.","He has received a menu.","He thinks the clients are confused.","He agrees to change the date."],0,"Rachel 說訂的是另一間分店，Kenji 才明白為什麼找不到訂位。"),
+Q("What will Ms. Owens most likely do next?",["Cancel the lunch","Drive to the hotel","Contact the restaurant","Book a new room"],2,"I'll call the restaurant and tell them you're on your way。")]),
+S7('text',`Lena Fischer [2:03 P.M.]
+Team, the printer for the trade show banners just told me they're out of the vinyl material we ordered.
+
+Omar Haddad [2:05 P.M.]
+Can they use something else?
+
+Lena Fischer [2:06 P.M.]
+They suggested fabric. It looks nicer but costs about $80 more.
+
+Grace Lin [2:08 P.M.]
+We still have some room in the marketing budget. I'd go for it.
+
+Omar Haddad [2:09 P.M.]
+Agreed. The show is on Thursday, so we can't wait for a new shipment anyway.
+
+Lena Fischer [2:10 P.M.]
+OK, I'll approve the change and ask them to deliver by Wednesday.`,[
+Q("What is the problem?",["A material is unavailable.","A trade show was canceled.","A banner has a spelling error.","A delivery was lost."],0,"they're out of the vinyl material，原訂材料缺貨。"),
+Q("At 2:08 P.M., what does Ms. Lin mean when she writes, \"I'd go for it\"?",["She wants to attend the show.","She supports paying more for fabric.","She will pick up the banners.","She disagrees with Mr. Haddad."],1,"她先說預算還夠，再說 I'd go for it，表示贊成多花錢改用布料。"),
+Q("When will the banners most likely be delivered?",["Monday","Tuesday","Wednesday","Thursday"],2,"ask them to deliver by Wednesday。")]),
+S7('instr',`Instructions for Submitting Travel Expenses
+
+1. Log in to the Finance Portal using your employee ID.
+2. Select "New Claim" and choose the trip from the drop-down menu.
+3. Upload a photo or scan of each receipt. Receipts under $25 do not need to be uploaded but must be listed.
+4. Enter the purpose of each expense in the comment box.
+5. Submit the claim to your manager for approval within 30 days of returning from your trip.
+
+Approved claims are paid with your next monthly salary. Claims submitted after 30 days require approval from the finance director.`,[
+Q("What is true about receipts under $25?",["They must be mailed.","They do not need to be uploaded.","They cannot be claimed.","They require a manager's signature."],1,"Receipts under $25 do not need to be uploaded but must be listed。"),
+Q("What happens if a claim is submitted 40 days after a trip?",["It is automatically rejected.","It is paid immediately.","It must be submitted on paper.","It must be approved by the finance director."],3,"超過 30 天需要財務長核准。")]),
+S7('instr',`Instructions for Online Interview Candidates
+
+Thank you for your interest in Brightwave Media. Please follow these steps to prepare for your video interview.
+
+• Test your camera and microphone at least one day before the interview using the link in your invitation email.
+• Join the meeting room five minutes before your scheduled time. The interviewer will admit you from the waiting room.
+• Have a copy of your résumé and portfolio ready to share on screen.
+• If you lose your connection, rejoin using the same link. If you cannot reconnect within ten minutes, call the recruiting team at 555-0177.
+
+Interviews last approximately 45 minutes.`,[
+Q("What are candidates asked to do at least one day before the interview?",["Send a portfolio","Test their equipment","Call the recruiting team","Confirm the time"],1,"Test your camera and microphone at least one day before。"),
+Q("What should a candidate do if he cannot reconnect within ten minutes?",["Send an email","Wait in the waiting room","Call the recruiting team","Reschedule online"],2,"call the recruiting team at 555-0177。"),
+Q("How long is the interview expected to last?",["30 minutes","45 minutes","60 minutes","90 minutes"],1,"Interviews last approximately 45 minutes。")]),
+S7('notice',`NOTICE: Cafeteria Closure
+
+The employee cafeteria on the first floor will be closed from July 15 to July 26 for kitchen renovations. During this period, a food truck will be parked outside the main entrance from 11:30 A.M. to 2:00 P.M. on weekdays, offering sandwiches, salads, and hot meals. Employees may also use their meal cards at Café Verde, located across the street, where they will receive a 10 percent discount. The renovated cafeteria will reopen on July 29 with an expanded salad bar and a new seating area.`,[
+Q("Why will the cafeteria be closed?",["A health inspection","Kitchen renovations","A staff shortage","A holiday"],1,"closed ... for kitchen renovations。"),
+Q("What is offered at Café Verde?",["Free coffee","Extended hours","A discount for employees","Catering services"],2,"they will receive a 10 percent discount。"),
+Q("What will be new when the cafeteria reopens?",["A larger salad bar","Lower prices","Breakfast service","Online ordering"],0,"an expanded salad bar，沙拉吧擴大。")]),
+S7('notice',`Notice to Members
+Peak Fitness Club
+
+Effective September 1, monthly membership fees will increase from $45 to $50. This is our first price change in four years and will allow us to replace aging equipment and extend weekend hours. Members who pay for a full year in advance before August 31 can lock in the current rate of $45 per month. Please speak with any front desk staff member for details. We thank you for your continued support.`,[
+Q("What is the purpose of the notice?",["To announce a fee increase","To introduce new trainers","To advertise a new branch","To report a closure"],0,"公告會費從 $45 調漲到 $50。"),
+Q("How can members keep paying $45 per month?",["By referring a friend","By paying for a year before August 31","By attending on weekends","By signing up online"],1,"pay for a full year in advance before August 31 可維持原價。")]),
+S7('letter',`Hartwell Insurance
+120 Lake Street, Denver, CO 80202
+
+March 3
+
+Ms. Olivia Brennan
+58 Cedar Lane
+Boulder, CO 80301
+
+Dear Ms. Brennan,
+
+Our records show that your home insurance policy will expire on April 15. To continue your coverage without interruption, please complete the enclosed renewal form and return it in the prepaid envelope by March 31. Your new annual premium will be $1,180, which reflects a 5 percent discount for having no claims in the past three years.
+
+If you have made any changes to your home, such as renovations or new security systems, please describe them on page 2 of the form.
+
+Sincerely,
+Marcus Feld
+Policy Services`,[
+Q("Why was the letter sent?",["To process a claim","To remind a customer to renew a policy","To announce a new office","To request payment for damage"],1,"保單即將到期，請她填寫續約表。"),
+Q("Why is Ms. Brennan receiving a discount?",["She has not made any claims recently.","She paid early.","She installed a security system.","She is a new customer."],0,"a 5 percent discount for having no claims in the past three years。"),
+Q("What is Ms. Brennan asked to describe on page 2?",["Her payment method","Her contact details","Past claims","Changes made to her home"],3,"changes to your home ... describe them on page 2。")]),
+S7('letter',`Dear Mr. Okoro,
+
+Thank you for visiting our factory in Penang last week. I hope you found the tour of our assembly lines informative. As discussed, I have enclosed samples of the three circuit board models you were interested in, along with a price list for orders of more than 10,000 units.
+
+Please note that the prices are valid until the end of November. If you place an order before then, we can also offer free shipping to your warehouse in Lagos.
+
+I look forward to working with you.
+
+Yours sincerely,
+Priya Raman
+Sales Director, Meridian Components`,[
+Q("What was enclosed with the letter?",["A contract","Product samples and a price list","A factory map","An invoice"],1,"enclosed samples ... along with a price list。"),
+Q("What is offered for orders placed before December?",["A 10 percent discount","Extra samples","A factory tour","Free shipping"],3,"11 月底前下單可免運費到拉哥斯倉庫。")]),
+S7('email',`To: Sophie Laurent <slaurent@mail.example>
+From: Kingston Car Rental <reservations@kingstoncar.example>
+Date: May 20
+Subject: Reservation Confirmation #KC-20931
+
+Dear Ms. Laurent,
+
+Thank you for choosing Kingston Car Rental. Your reservation is confirmed as follows:
+
+Pick-up: May 28, 10:00 A.M., Lisbon Airport, Terminal 1
+Return: June 2, 6:00 P.M., Porto City Office
+Vehicle: Compact (Renault Clio or similar)
+
+Please note that a one-way fee of €40 applies because the vehicle will be returned to a different location. A valid driver's license and the credit card used for booking must be presented at pick-up. To add a GPS unit or child seat, reply to this email at least 48 hours before pick-up.`,[
+Q("Where will Ms. Laurent return the car?",["At Lisbon Airport","At the Porto City Office","At Terminal 1","At her hotel"],1,"Return: Porto City Office。"),
+Q("Why is an extra fee charged?",["The car is returned late.","A GPS unit was added.","The car is returned to a different location.","She is under 25."],2,"one-way fee ... returned to a different location。"),
+Q("What should she do to request a child seat?",["Call the airport office","Reply to the email in advance","Ask at pick-up","Visit the website"],1,"reply to this email at least 48 hours before pick-up。")]),
+S7('email',`To: Marketing Team
+From: Carla Mendes
+Date: Tuesday, 9:40 A.M.
+Subject: Quarterly review moved
+
+Hi all,
+
+Our quarterly review with the regional director, originally set for Thursday afternoon, has been moved to Friday at 10:00 A.M. because her flight from Singapore was rescheduled. The meeting will now take place in Conference Room B, as Room A is being used for interviews that day.
+
+Please send me your updated campaign figures by Wednesday at noon so that I can combine them into a single presentation. Ahmed, could you also prepare a short summary of the social media results?
+
+Thanks,
+Carla`,[
+Q("Why has the review been rescheduled?",["A room is unavailable.","The director's flight changed.","Carla will be on vacation.","The figures are not ready."],1,"her flight from Singapore was rescheduled。Room A 被占用是換會議室的原因，不是改期原因。"),
+Q("What is Ahmed asked to do?",["Book Conference Room B","Pick up the director","Summarize social media results","Conduct interviews"],2,"prepare a short summary of the social media results。")]),
+S7('press',`FOR IMMEDIATE RELEASE
+Contact: Nadia Ferreira, Communications Manager, press@solarway.example
+
+SolarWay Energy Partners with Five Universities on Battery Research
+
+AUSTIN, February 10: SolarWay Energy announced today a three-year partnership with five universities to develop longer-lasting home batteries. The company will provide $15 million in funding and access to its testing laboratories in Texas. Graduate students participating in the program will also be offered paid summer internships at SolarWay.
+
+"Better storage is the key to making solar power practical for every household," said Chief Technology Officer Daniel Brooks. The first results of the research are expected to be published next year.`,[
+Q("What is the main purpose of the press release?",["To announce a research partnership","To introduce a new CEO","To report annual profits","To advertise job openings at a factory"],0,"宣布與五所大學合作研究電池。"),
+Q("What will graduate students be offered?",["Scholarships","Paid internships","Free batteries","Teaching positions"],1,"paid summer internships at SolarWay。"),
+Q("Who is Daniel Brooks?",["A university professor","A graduate student","A company executive","A journalist"],2,"Chief Technology Officer 技術長，屬於公司高層。")]),
+S7('press',`FOR IMMEDIATE RELEASE
+
+Hillcrest Museum of Science to Reopen After Expansion
+
+HILLCREST, June 2: After eighteen months of construction, the Hillcrest Museum of Science will reopen to the public on July 12. The expansion adds a new space exploration wing and a 200-seat planetarium. Admission will be free for all visitors during the opening weekend, July 12–13. Starting July 14, regular admission will be $18 for adults and $9 for children under 12. Members will be invited to a special preview evening on July 10.`,[
+Q("What is new at the museum?",["A gift shop","A planetarium","A café","A parking garage"],1,"a 200-seat planetarium。"),
+Q("When can members visit before the public opening?",["June 2","July 12","July 10","July 14"],2,"Members ... special preview evening on July 10。")]),
+S7('web',`www.greenvalleyfarmstay.example/booking
+
+Home | Rooms | Activities | Booking | Contact
+
+BOOKING INFORMATION
+
+Check-in: 3:00 P.M. – 8:00 P.M.
+Check-out: by 11:00 A.M.
+
+• A deposit of 30% is required to confirm your booking.
+• Cancellations made at least 14 days before arrival receive a full refund of the deposit.
+• Breakfast made with ingredients from our own farm is included in all room rates.
+• Guided farm tours run daily at 9:00 A.M. and cost $10 per person.
+• Pets are welcome in our garden cottages only.
+
+Late arrival? Please call us at 555-0199 so we can leave your key in a lockbox.`,[
+Q("What is included in the room rate?",["A farm tour","Breakfast","Airport pick-up","Dinner"],1,"Breakfast ... is included in all room rates。農場導覽要另外付 $10。"),
+Q("What is true about pets?",["They are not allowed.","They require a deposit.","They are allowed in certain rooms.","They must stay outdoors."],2,"Pets are welcome in our garden cottages only。"),
+Q("Why should guests call if they arrive late?",["To pay a fee","To arrange to collect a key","To book a tour","To change rooms"],1,"so we can leave your key in a lockbox。")]),
+S7('web',`www.codecraftacademy.example/courses/data-analysis
+
+COURSES > Data Analysis for Beginners
+
+Learn to clean, analyze, and visualize data using spreadsheets and Python. No programming experience is needed.
+
+Format: Online, live classes every Tuesday and Thursday, 7:00–9:00 P.M.
+Length: 8 weeks
+Next start date: September 9
+Fee: $480 ($420 if you register by August 15)
+
+Students who complete all assignments receive a certificate. Recordings of each class are available for 30 days.
+
+[Register Now]   [Download Syllabus]`,[
+Q("Who is the course intended for?",["Experienced programmers","Beginners","Spreadsheet trainers","University professors"],1,"for Beginners，No programming experience is needed。"),
+Q("How can students save $60?",["By registering by August 15","By attending all classes","By downloading the syllabus","By paying in cash"],0,"$480 和 $420 差 $60，條件是 8/15 前報名。"),
+Q("What is indicated about class recordings?",["They are available for a limited time.","They cost extra.","They are only for certificate holders.","They can be downloaded permanently."],0,"Recordings ... are available for 30 days，有時間限制。")])
+);
+
+// ===== 新增 Part 7 多篇閱讀（10 組 × 5 題）=====
+G.push(
+M7([['web',`www.bayviewhotel.example/meetings
+
+Meeting Packages at the Bayview Hotel
+
+Standard Package: $45 per person
+Meeting room, projector, coffee and tea
+
+Business Package: $65 per person
+Everything in Standard, plus lunch buffet and Wi-Fi
+
+Premium Package: $85 per person
+Everything in Business, plus afternoon snacks and a dedicated event coordinator
+
+Groups of 30 or more receive a 10% discount. Please book at least three weeks in advance.`],
+['email',`To: events@bayviewhotel.example
+From: Hannah Cole <hcole@trilinetech.example>
+Date: April 2
+Subject: Booking request for April 30
+
+Hello,
+
+I would like to book a meeting room for our sales training on April 30 for 25 people. We will need lunch and Wi-Fi, but we do not need afternoon snacks, as the session ends at 2:00 P.M. Could you also tell me whether there is a parking area for our participants? Several of them will be driving from out of town.
+
+Best regards,
+Hannah Cole
+Triline Technologies`]],[
+Q("What is the purpose of the e-mail?",["To request a booking","To cancel an event","To complain about a service","To ask for a refund"],0,"I would like to book a meeting room。"),
+Q("Which package will Ms. Cole most likely choose?",["Standard","Business","Premium","None of them"],1,"她需要午餐和 Wi-Fi，但不需要下午點心，對照網頁就是 Business 方案。"),
+Q("What is indicated about Ms. Cole's group?",["It booked too late.","It will stay overnight.","It needs an extra projector.","It will not receive a group discount."],3,"團體折扣要 30 人以上，她只有 25 人。4/2 預訂 4/30 已超過三週，並沒有太晚。"),
+Q("What does Ms. Cole ask about?",["The price of lunch","Hotel rooms","Parking","Equipment rental"],2,"whether there is a parking area for our participants。"),
+Q("In the e-mail, the word \"session\" is closest in meaning to",["school term","training event","legal hearing","sports season"],1,"這裡的 session 指的是這場業務培訓活動。")]),
+M7([['notice',`NOTICE: Building Fire Drill
+To all tenants of the Cornerstone Building
+
+A fire drill will be held on Wednesday, October 8, at 10:30 A.M. When the alarm sounds, please leave the building by the nearest stairway. Do not use the elevators. Gather at the assembly point in the parking lot across Elm Street. The drill should last about 20 minutes.
+
+Cornerstone Property Management`],
+['email',`To: All Staff, Fifth Floor
+From: Brian Tsai, Office Manager
+Date: October 6
+Subject: Fire drill on Wednesday
+
+Hi everyone,
+
+Please note the building fire drill on Wednesday morning. Because of the drill, our weekly team meeting will start at 11:15 A.M. instead of 10:30 A.M. Also, visitors expected that morning should be told about the drill in advance. Reception will keep a list of all visitors so that everyone can be accounted for at the assembly point.
+
+Brian`],
+['text',`Mei Chen [10:52 A.M.]
+Brian, I'm at the assembly point, but I don't see our group.
+
+Brian Tsai [10:53 A.M.]
+We're on the far side, next to the blue van.
+
+Mei Chen [10:54 A.M.]
+Got it. By the way, my 11:00 visitor from Delta Supplies just arrived. Should I bring him over?
+
+Brian Tsai [10:55 A.M.]
+Yes, please. Make sure reception adds his name to the list.`]],[
+Q("Where should tenants gather during the drill?",["In the lobby","In a parking lot across the street","On the fifth floor","At the nearest stairway"],1,"Gather at the assembly point in the parking lot across Elm Street。"),
+Q("Why was the team meeting rescheduled?",["A visitor is arriving.","The office manager is traveling.","It conflicts with a fire drill.","The meeting room is being repaired."],2,"原本 10:30 開會，剛好和 10:30 的消防演練撞期。"),
+Q("According to the e-mail, what will reception do?",["Sound the alarm","Keep a list of visitors","Unlock the elevators","Move the van"],1,"Reception will keep a list of all visitors。"),
+Q("At 10:54 A.M., what does Ms. Chen mean when she writes, \"Got it\"?",["She understands where the group is.","She has received a package.","She has found her visitor's name.","She agrees to reschedule the meeting."],0,"Brian 剛說明大家在藍色廂型車旁，她回 Got it 表示知道位置了。"),
+Q("What is suggested about the visitor from Delta Supplies?",["He canceled his appointment.","He works in the Cornerstone Building.","He will attend the team meeting.","He arrived during the drill."],3,"演練 10:30 開始，訪客在 10:54 抵達時大家還在集合點，代表演練仍在進行。")]),
+M7([['web',`www.homebotstore.example/cleanmate-s5
+
+CleanMate S5 Robot Vacuum: $299
+★★★★☆ (1,284 reviews)
+
+• Up to 120 minutes of cleaning per charge
+• Smart mapping for homes up to 150 square meters
+• Controlled with the CleanMate app
+• 1-year warranty (extendable to 3 years for $39)
+
+Free shipping on orders over $200. Returns accepted within 30 days.`],
+['manual',`CleanMate S5: Quick Start Guide
+
+1. Place the charging dock against a wall with 0.5 m of clear space on each side.
+2. Charge the vacuum for at least 4 hours before first use.
+3. Open the CleanMate app and follow the instructions to connect to your home Wi-Fi.
+4. Empty the dust bin after every use and clean the filter once a week.
+
+If the red light on the vacuum flashes, the brush may be blocked. Remove any hair or threads and restart the vacuum.`],
+['email',`To: support@homebotstore.example
+From: Tomás Rivera
+Date: March 18
+Subject: CleanMate S5 problem
+
+Hello,
+
+I bought a CleanMate S5 from your Web site on March 2. It worked well for the first two weeks, but since yesterday it stops after a few minutes and a red light flashes. I have already removed some threads from the brush, but the problem continues. As my apartment is only 60 square meters, I am also surprised that it cannot finish cleaning. I would like to know whether I can exchange it for a new unit.
+
+Tomás Rivera`]],[
+Q("What is indicated about the CleanMate S5?",["It can be controlled with an app.","It comes with a three-year warranty.","It is designed for offices.","It is sold only in stores."],0,"Controlled with the CleanMate app。保固標準是一年，三年要加價。"),
+Q("According to the guide, what should users do before using the vacuum for the first time?",["Clean the filter","Charge it for at least four hours","Register the warranty","Empty the dust bin"],1,"Charge the vacuum for at least 4 hours before first use。"),
+Q("What has Mr. Rivera already done?",["Contacted the manufacturer","Purchased an extended warranty","Followed the instructions for a flashing light","Charged the vacuum overnight"],2,"說明書寫紅燈閃爍要清除毛髮線頭，他已經把刷子上的線清掉了。"),
+Q("Why is Mr. Rivera surprised?",["The vacuum was expensive.","His apartment is much smaller than the area the vacuum can handle.","Shipping was not free.","The app is difficult to use."],1,"機器可處理 150 平方公尺，他家只有 60 平方公尺卻掃不完。"),
+Q("What is most likely true about Mr. Rivera's request?",["He must pay $39.","He bought the vacuum in a store.","His warranty has expired.","He is still within the return period."],3,"3/2 購買、3/18 來信，仍在 30 天退貨期內。")]),
+M7([['article',`Bellmont Library to Begin Renovation
+
+The Bellmont Public Library will close its main building on Oak Street for renovation from January 6 to August 31. The $3.2 million project will add a children's reading room, a media lab, and an elevator. During the closure, a temporary branch will operate at the Bellmont Community Center on River Road, open Tuesday through Saturday from 10 A.M. to 6 P.M. Library director Grace Huang said that the most popular books and all reserved items would be moved to the temporary site. The library is also looking for volunteers to help move materials in late December.`],
+['letter',`December 2
+
+Dear Ms. Huang,
+
+I read in the newspaper about the library's renovation, and I would like to offer my help. I retired last year after working as a school librarian for 30 years, and I have experience organizing book collections. I am available every weekday afternoon in December, although I will be traveling from December 26 to 30.
+
+Please let me know how I can sign up.
+
+Sincerely,
+Robert Klein`]],[
+Q("What is the article mainly about?",["The opening of a new community center","A library's plan to renovate its building","A shortage of library books","A change in library leadership"],1,"整篇在講圖書館整修計畫。"),
+Q("What will NOT be added during the renovation?",["A children's reading room","A media lab","A café","An elevator"],2,"文中只提到兒童閱覽室、媒體實驗室和電梯，沒有咖啡廳。"),
+Q("What is indicated about the temporary branch?",["It is closed on Mondays.","It is on Oak Street.","It opens at 9 A.M.","It will have a media lab."],0,"開放時間是週二到週六，所以週一不開。Oak Street 是原本的館址。"),
+Q("Why did Mr. Klein write the letter?",["To return a book","To apply for a paid job","To complain about the closure","To volunteer his help"],3,"I would like to offer my help，對應文章中招募志工。"),
+Q("What is suggested about Mr. Klein?",["He works at the community center.","He is a member of the library board.","He may be unable to help during part of the moving period.","He wrote the newspaper article."],2,"搬書是 12 月下旬，他 12/26 到 12/30 要出遠門。")]),
+M7([['press',`FOR IMMEDIATE RELEASE
+
+TerraBrew Coffee to Open Flagship Store in Taipei
+
+TAIPEI, March 3: TerraBrew Coffee, the Melbourne-based specialty coffee chain, will open its first Asian flagship store in Taipei's Xinyi District on April 18. The two-story store will include a roasting area where customers can watch beans being roasted, as well as a training space for barista classes. To celebrate the opening, the first 200 customers on April 18 will receive a free TerraBrew travel mug. The store will open at 8:00 A.M. daily. Barista classes will begin in May and can be booked on the company's Web site.`],
+['email',`To: Wendy Lin
+From: Jason Huang
+Date: April 20
+Subject: TerraBrew
+
+Hi Wendy,
+
+I went to the new TerraBrew store on Saturday morning. I got there half an hour before it opened, and there was already a long line, but I still managed to get one of the free mugs! The roasting area was really interesting. I'm thinking of signing up for one of their barista classes next month. Would you like to join me? I think it would be useful for planning our café's new drink menu.
+
+Jason`]],[
+Q("What is the purpose of the press release?",["To announce a store opening","To introduce a new coffee bean","To report on a merger","To recruit baristas"],0,"宣布台北旗艦店開幕。"),
+Q("Where is TerraBrew based?",["In Taipei","In Melbourne","In Singapore","In Tokyo"],1,"the Melbourne-based specialty coffee chain。"),
+Q("What time did Mr. Huang most likely arrive at the store?",["7:00 A.M.","7:30 A.M.","8:00 A.M.","8:30 A.M."],1,"8:00 開門，他提早半小時到，所以是 7:30。"),
+Q("What is suggested about Mr. Huang?",["He works for TerraBrew.","He has taken a barista class before.","He lives in Melbourne.","He was among the first 200 customers."],3,"只有開幕日前 200 名才有馬克杯，他拿到了。"),
+Q("Why does Mr. Huang suggest taking a class?",["To become a professional barista","To help plan a menu for their café","To get a discount","To meet the store owner"],1,"useful for planning our café's new drink menu。")]),
+M7([['web',`www.northlinelogistics.example/careers
+
+JOB OPENING: Warehouse Supervisor (Full-time)
+Location: Tainan Distribution Center
+
+Responsibilities:
+• Supervise a team of 15 warehouse staff
+• Schedule shifts and monitor inventory
+• Ensure that safety rules are followed
+
+Requirements:
+• At least three years of warehouse experience
+• Forklift license
+• Ability to work night shifts when needed
+
+To apply, e-mail your résumé and the names of two references to hr@northline.example by June 30.`],
+['email',`To: hr@northline.example
+From: Kevin Liao
+Date: June 24
+Subject: Application for Warehouse Supervisor
+
+Dear Hiring Manager,
+
+I am writing to apply for the Warehouse Supervisor position at your Tainan Distribution Center. I have worked at Sunfield Foods' warehouse for five years, the last two as the leader of a team of eight people. I hold a valid forklift license and am comfortable working night shifts. My résumé is attached. I will send the contact details of my references separately this week.
+
+Sincerely,
+Kevin Liao`],
+['email',`To: Kevin Liao
+From: Amy Shih, Human Resources
+Date: July 3
+Subject: RE: Application for Warehouse Supervisor
+
+Dear Mr. Liao,
+
+Thank you for your application. We have received your résumé and both references. We would like to invite you to an interview at the Tainan Distribution Center on July 10 at 2:00 P.M. The interview will include a tour of the warehouse, so please wear closed-toe shoes. Please confirm your attendance by July 7.
+
+Best regards,
+Amy Shih`]],[
+Q("What is NOT listed as a responsibility of the position?",["Scheduling shifts","Monitoring inventory","Training new drivers","Ensuring safety"],2,"職責中沒有提到訓練司機。"),
+Q("What is indicated about Mr. Liao?",["He has more than the required years of experience.","He lacks a forklift license.","He cannot work at night.","He currently works for Northline."],0,"要求三年經驗，他有五年。"),
+Q("What did Mr. Liao NOT include in his first e-mail?",["His résumé","His references' contact details","His work history","His license information"],1,"他說推薦人資料之後另外寄。"),
+Q("What is suggested about Mr. Liao's references?",["They work at Northline.","They were not received.","They were sent by mail.","They were sent after June 24."],3,"6/24 的信還沒附，7/3 人資說兩位推薦人都收到了，所以是 6/24 之後寄的。"),
+Q("Why should Mr. Liao wear closed-toe shoes?",["It is the company dress code.","He will operate a forklift.","The interview includes a warehouse tour.","He will work a night shift."],2,"The interview will include a tour of the warehouse, so please wear closed-toe shoes。")]),
+M7([['road',`EXIT 24: MILLBROOK
+CLOSED
+October 3 – October 17
+
+DETOUR: Use Exit 26, then follow Route 5 South
+(adds approx. 10 min)
+
+Exit 24 will reopen at 6:00 A.M. on October 18
+
+State Department of Transportation`],
+['text',`Daniel Park [8:05 A.M.]
+Hi Sara, I'm on my way to the Millbrook factory for the 9:00 inspection, but Exit 24 is closed.
+
+Sara Novak [8:07 A.M.]
+Oh, I forgot to mention that. You need to take the next exit and go south on Route 5.
+
+Daniel Park [8:08 A.M.]
+OK. Do you think I'll still make it by 9?
+
+Sara Novak [8:10 A.M.]
+You should, but it'll be close. I'll let the plant manager know you might be a few minutes late.
+
+Daniel Park [8:11 A.M.]
+Thanks. Also, can you print the inspection checklist? I left my copy at the office.
+
+Sara Novak [8:12 A.M.]
+No problem. I'll have it ready at the front gate.`]],[
+Q("What is the purpose of the sign?",["To announce a temporary exit closure","To warn about a speed limit","To advertise a factory","To give parking information"],0,"告示說明 24 號出口暫時封閉。"),
+Q("Which exit will Mr. Park most likely use?",["Exit 22","Exit 24","Exit 26","Exit 28"],2,"告示寫改走 26 號出口，Sara 也說走下一個出口。"),
+Q("When did the conversation most likely take place?",["Before October 3","Between October 3 and October 17","On October 18","After October 18"],1,"24 號出口在封閉期間，所以是 10/3 到 10/17 之間。10/18 早上 6 點就重新開放了。"),
+Q("At 8:10 A.M., what does Ms. Novak mean when she writes, \"it'll be close\"?",["Mr. Park may arrive just in time.","The factory is near the highway.","The inspection will end soon.","The road is narrow."],0,"繞路多 10 分鐘，可能剛好趕上或稍微遲到。"),
+Q("What will Ms. Novak do?",["Drive Mr. Park to the factory","Cancel the inspection","Call the transportation department","Prepare a document"],3,"她答應把檢查清單印好放在大門口。")]),
+M7([['notice',`NOTICE: Annual Health Check-ups
+
+All full-time employees are entitled to a free annual health check-up at Lakeside Medical Clinic. Check-ups will be available from November 3 to November 28. Appointments must be made through the HR portal. Employees who complete their check-up by November 14 will receive an extra day of paid leave.
+
+Human Resources Department`],
+['instr',`How to Prepare for Your Health Check-up
+
+1. Do not eat or drink anything except water for 8 hours before your appointment.
+2. Bring your employee ID card and a list of any medicines you take.
+3. Wear comfortable clothing. Lockers are available at the clinic.
+4. Arrive 15 minutes early to complete a short questionnaire.
+5. Results will be sent to you by e-mail within 10 working days.`],
+['email',`To: hr@company.example
+From: Nina Gómez
+Date: November 10
+Subject: Health check-up
+
+Hello,
+
+I had my check-up at Lakeside Medical Clinic this morning. Everything went smoothly, but I realized I had forgotten to bring my ID card, so the clinic asked me to e-mail HR to confirm my employment. Could you please send them confirmation? Also, I would like to know when the extra day of leave can be used.
+
+Thank you,
+Nina Gómez`]],[
+Q("Who is eligible for the free check-up?",["All visitors","Full-time employees","Employees' family members","Part-time staff only"],1,"All full-time employees are entitled to a free annual health check-up。"),
+Q("What are employees told to do before the appointment?",["Avoid eating for eight hours","Exercise in the morning","E-mail HR","Fill out a form online"],0,"第 1 點：前 8 小時只能喝水。"),
+Q("What did Ms. Gómez forget to bring?",["A list of medicines","Comfortable clothing","Her employee ID card","A questionnaire"],2,"I had forgotten to bring my ID card。"),
+Q("What is suggested about Ms. Gómez?",["She works part-time.","She qualifies for an extra day of leave.","She must repeat her check-up.","She has received her results."],1,"11/14 前完成可多一天假，她 11/10 就做完了。"),
+Q("By when should Ms. Gómez receive her results?",["Within 15 minutes","Within 8 hours","By November 3","Within 10 working days"],3,"Results will be sent ... within 10 working days。")]),
+M7([['letter',`Global Traveler Magazine
+P.O. Box 4410, Chicago, IL 60601
+
+September 5
+
+Dear Mr. Abbott,
+
+Your subscription to Global Traveler Magazine will end with the November issue. Renew now and continue to enjoy twelve issues of travel stories, photography, and expert tips each year.
+
+Renew for one year for $36, or two years for $60. Subscribers who renew online before October 1 will also receive our special Pocket Guide to European Cities at no extra cost.
+
+Sincerely,
+Linda Park
+Subscriber Services`],
+['web',`www.globaltravelermag.example/renew
+
+RENEWAL CONFIRMATION
+
+Thank you, Mr. Gerald Abbott!
+
+Order number: GT-55817
+Date: September 22
+Plan: 2-year subscription (24 issues)
+Amount paid: $60.00
+Free gift: Pocket Guide to European Cities (ships within 2 weeks)
+
+Your new subscription period begins with the December issue. To change your mailing address, visit My Account.`]],[
+Q("Why was the letter sent?",["To announce a price increase","To encourage a subscriber to renew","To confirm a payment","To introduce a new magazine"],1,"提醒訂閱即將到期並鼓勵續訂。"),
+Q("How many issues of the magazine are published each year?",["6","10","12","24"],2,"twelve issues ... each year。24 是兩年的期數。"),
+Q("What is indicated about Mr. Abbott?",["He renewed by mail.","He chose the plan with the lower yearly cost.","He paid extra for shipping.","He will stop receiving the magazine in November."],1,"兩年 $60，平均一年 $30，比一年方案 $36 便宜。"),
+Q("Why will Mr. Abbott receive a pocket guide?",["He renewed online before October 1.","He has subscribed for ten years.","He referred a friend.","He paid for it separately."],0,"他 9/22 在網站上續訂，符合 10/1 前線上續訂的條件。"),
+Q("When does Mr. Abbott's new subscription period begin?",["With the October issue","With the November issue","In January","With the December issue"],3,"begins with the December issue。")]),
+M7([['notice',`NOTICE: Office Relocation
+
+As of Monday, May 19, the Accounting and Legal departments will move from the 3rd floor of our Harbor Street building to the 12th floor of Skyline Tower at 88 Center Road. All other departments will remain at Harbor Street. Packing boxes will be delivered to each desk on May 12. Please pack your personal items and label every box with your name and new desk number by 5:00 P.M. on Friday, May 16. Movers will handle all furniture and computers.`],
+['email',`To: Facilities Team
+From: Rita Okafor, Legal Department
+Date: May 13
+Subject: Boxes for the move
+
+Hello,
+
+I received only two packing boxes yesterday, but I will need at least five because I have a large number of legal files to move. Also, I will be at a client meeting in Osaka all day Thursday and Friday, so I plan to finish packing by Wednesday evening. Could someone confirm my new desk number before then?
+
+Thank you,
+Rita Okafor`],
+['text',`Ken Ito [9:20 A.M.]
+Rita, three more boxes are on their way to your desk now.
+
+Rita Okafor [9:22 A.M.]
+Great, thank you! Any news on my desk number?
+
+Ken Ito [9:25 A.M.]
+You'll be at 12-D07, next to the window. I'll e-mail the floor plan too.
+
+Rita Okafor [9:26 A.M.]
+Perfect. That's all I needed.`]],[
+Q("What is the notice mainly about?",["Some departments are moving to a new location.","A building is being renovated.","New furniture is being purchased.","The company is hiring movers."],0,"會計部和法務部要搬到 Skyline Tower。"),
+Q("When did Ms. Okafor receive her first boxes?",["May 13","May 12","May 16","May 19"],1,"她 5/13 寫信說 yesterday 收到，對照公告是 5/12 發箱子。"),
+Q("Why does Ms. Okafor need more boxes?",["Her first boxes were damaged.","She is moving two offices.","She has many files to move.","Her coworker needs them."],2,"I have a large number of legal files to move。"),
+Q("Why does Ms. Okafor plan to finish packing early?",["The movers are arriving on Wednesday.","Her department moves first.","She is starting a vacation.","She will be away on business at the end of the week."],3,"週四、週五要去大阪開客戶會議，而打包期限是週五下午 5 點。"),
+Q("Where will Ms. Okafor's new desk be located?",["On the 3rd floor of the Harbor Street building","On the 12th floor of Skyline Tower","In Osaka","On the 12th floor of the Harbor Street building"],1,"法務部搬到 Skyline Tower 12 樓，座位是 12-D07。")])
+);
+
 const VW=[];
 const VG=n=>({s:'R',p:'單字 Vocabulary ('+n+')',qs:VW.slice((n-1)*20,n*20).map((r,i)=>{const k=((n-1)*20+i)*3%4,o=[r[3],r[4],r[5]];o.splice(k,0,r[2]);return Q(r[0]+(r[1]?' ('+r[1]+')':'')+' 的意思是？',o,k,r[0]+'：'+r[2])})});
 const VX=`acquisition||收購|0
@@ -1548,18 +2222,29 @@ function newVocab(n){const g=G[VGI];const cv=document.getElementById('vc').value
 function autoV(gi){const g=G[gi];if(!g.vocab||!g.qs.length)return;if(g.qs.every((q,qi)=>A[gi+'_'+qi]!==undefined)){D.add(gi);const ok=g.qs.filter((q,qi)=>A[gi+'_'+qi]===q.a).length;res.textContent='單字練習完成：答對 '+ok+' / '+g.qs.length+' 題'}}
 document.getElementById('vgo').onclick=()=>newVocab(+document.getElementById('vn').value);
 let sec='L',checked=false,sub='all';const A={},D=new Set(),SUBS={L:['Part 1','Part 2','Part 3','Part 4'],R:['Part 5','Part 6','Part 7','單字']};
-const vis=g=>g.s===sec&&(sub==='all'||g.p.startsWith(sub));
+const TEST={order:[],set:new Set()};
+const vis=g=>g.s===sec&&(sub==='test'?TEST.set.has(g):!g.test&&(sub==='all'||g.p.startsWith(sub)));
+const gk=g=>g.m?'P7M':g.p.slice(0,6);
 const ORDS={},QO={};
 const shuf=a=>{for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
-function ordList(){const base=G.map((_,i)=>i).filter(i=>vis(G[i]));return ORDS[sec+'|'+sub]||base}
-document.getElementById('shf').onclick=()=>{tok++;if(window.speechSynthesis)speechSynthesis.cancel();const base=G.map((_,i)=>i).filter(i=>vis(G[i])),by={};base.forEach(i=>{const p=G[i].p.slice(0,6);(by[p]=by[p]||[]).push(i)});ORDS[sec+'|'+sub]=Object.values(by).flatMap(a=>shuf(a));G.forEach((g,gi)=>{if(vis(g)&&!g.ps&&!g.au)QO[gi]=shuf(g.qs.map((_,i)=>i))});res.textContent='';render();window.scrollTo(0,0)};
+function ordList(){if(sub==='test')return ORDS['R|test']||TEST.order;const base=G.map((_,i)=>i).filter(i=>vis(G[i]));return ORDS[sec+'|'+sub]||base}
+G.push({s:'R',p:'Part 5 句子填空（隨機 30 題）',test:1,qs:[]});const TGI=G.length-1;
+function pickExact(pool,target){let best=[],bs=-1;for(let t=0;t<800;t++){const s=shuf(pool.slice());let sum=0;const out=[];for(const gi of s){const n=G[gi].qs.length;if(sum+n<=target){out.push(gi);sum+=n}if(sum===target)return out}if(sum>bs){bs=sum;best=out}}return best}
+function newTest(){TEST.order.forEach(gi=>{G[gi].qs.forEach((q,qi)=>delete A[gi+'_'+qi]);D.delete(gi);delete QO[gi]});delete ORDS['R|test'];
+ const R=G.map((g,i)=>i).filter(i=>G[i].s==='R'&&!G[i].test&&!G[i].vocab);
+ const p5=R.filter(i=>G[i].p.startsWith('Part 5')).flatMap(i=>G[i].qs);G[TGI].qs=shuf(p5.slice()).slice(0,30);
+ const p6=pickExact(R.filter(i=>G[i].p.startsWith('Part 6')),16),p7s=pickExact(R.filter(i=>G[i].p.startsWith('Part 7')&&!G[i].m),29),p7m=pickExact(R.filter(i=>G[i].m),25);
+ TEST.order=[TGI,...p6,...p7s,...p7m];TEST.set=new Set(TEST.order.map(i=>G[i]));res.textContent=''}
+document.getElementById('tgo').onclick=()=>{newTest();render();window.scrollTo(0,0)};
+document.getElementById('shf').onclick=()=>{tok++;if(window.speechSynthesis)speechSynthesis.cancel();const base=sub==='test'?TEST.order.slice():G.map((_,i)=>i).filter(i=>vis(G[i])),by={};base.forEach(i=>{const p=gk(G[i]);(by[p]=by[p]||[]).push(i)});ORDS[sec+'|'+sub]=Object.values(by).flatMap(a=>shuf(a));G.forEach((g,gi)=>{if(vis(g)&&!g.ps&&!g.au)QO[gi]=shuf(g.qs.map((_,i)=>i))});res.textContent='';render();window.scrollTo(0,0)};
 document.getElementById('ord').onclick=()=>{delete ORDS[sec+'|'+sub];G.forEach((g,gi)=>{if(vis(g))delete QO[gi]});render();window.scrollTo(0,0)};
-const SUBN=()=>sub==='all'?'全部':sub;
-function buildSub(){document.getElementById('psub').innerHTML=['all',...SUBS[sec]].map(s=>'<button data-s="'+s+'"'+(s===sub?' class="on"':'')+'>'+(s==='all'?'全部':s)+' ('+G.filter(g=>g.s===sec&&(s==='all'||g.p.startsWith(s))).reduce((a,g)=>a+(g.vocab?VP.length:g.qs.length),0)+')</button>').join('')}
-document.getElementById('psub').onclick=e=>{const b=e.target.closest('button');if(!b)return;sub=b.dataset.s;res.textContent='';buildSub();if(sub==='單字'&&!G[VGI].qs.length){newVocab(+document.getElementById('vn').value)}else render();window.scrollTo(0,0)};
+const SUBN=()=>sub==='all'?'全部':sub==='test'?'閱讀測驗':sub;
+const FIRST=()=>sec==='R'?'test':'all';
+function buildSub(){document.getElementById('psub').innerHTML=[FIRST(),...SUBS[sec]].map(s=>'<button data-s="'+s+'"'+(s===sub?' class="on"':'')+'>'+(s==='test'?'閱讀測驗 (100)':(s==='all'?'全部':s)+' ('+G.filter(g=>g.s===sec&&!g.test&&(s==='all'||g.p.startsWith(s))).reduce((a,g)=>a+(g.vocab?VP.length:g.qs.length),0)+')')+'</button>').join('')}
+document.getElementById('psub').onclick=e=>{const b=e.target.closest('button');if(!b)return;sub=b.dataset.s;res.textContent='';buildSub();if(sub==='test'&&!TEST.order.length){newTest();render()}else if(sub==='單字'&&!G[VGI].qs.length){newVocab(+document.getElementById('vn').value)}else render();window.scrollTo(0,0)};
 const app=document.getElementById('app'),res=document.getElementById('res');
 function render(){
- app.innerHTML='';let n=0;document.getElementById('vctl').style.display=(sec==='R'&&sub==='單字')?'flex':'none';
+ app.innerHTML='';let n=0;document.getElementById('vctl').style.display=(sec==='R'&&sub==='單字')?'flex':'none';document.getElementById('tctl').style.display=(sec==='R'&&sub==='test')?'flex':'none';
  ordList().forEach(gi=>{const g=G[gi];
   const checked=D.has(gi);
   if(g.vocab&&!g.qs.length){if(sub==='單字')app.insertAdjacentHTML('beforeend','<div class="card note">請選擇題數後按「開始練習」。</div>');return}
@@ -1568,6 +2253,7 @@ function render(){
   if(g.au)h+='<button data-play="'+gi+'">▶ 播放音檔</button><div class="vnote" id="vn'+gi+'">'+(VN[gi]||'')+'</div>';
   if(g.img!==undefined)h+='<img class="ph" alt="" src="'+IMG[g.img]+'">';
   if(g.ps)h+='<div class="passage">'+g.ps+'</div>';
+  if(g.docs)g.docs.forEach(d=>{h+='<div class="dlab">'+d[0]+'</div><div class="passage">'+d[1]+'</div>'});
   (QO[gi]||g.qs.map((_,i)=>i)).forEach(qi=>{const q=g.qs[qi];
    const k=gi+'_'+qi;
    n++;h+='<div class="q">'+n+'. '+(g.hide&&!checked?'請聽音檔後作答':q.q)+'</div>';
@@ -1632,14 +2318,16 @@ app.addEventListener('click',e=>{
  if(b.dataset.play!==undefined){speak(G[b.dataset.play],b.dataset.play);return}
  if(b.dataset.k&&!D.has(+b.dataset.k.split('_')[0])){const gi0=+b.dataset.k.split('_')[0];A[b.dataset.k]=+b.dataset.o;autoV(gi0);render()}
 });
-function setSec(s){sec=s;sub='all';res.textContent='';buildSub();document.getElementById('tL').classList.toggle('on',s==='L');document.getElementById('tR').classList.toggle('on',s==='R');render()}
+function setSec(s){sec=s;sub=FIRST();res.textContent='';if(sub==='test'&&!TEST.order.length)newTest();buildSub();document.getElementById('tL').classList.toggle('on',s==='L');document.getElementById('tR').classList.toggle('on',s==='R');render()}
 document.getElementById('tL').onclick=()=>setSec('L');
 document.getElementById('tR').onclick=()=>setSec('R');
 document.getElementById('chk').onclick=()=>{
  let t=0,r={L:[0,0],R:[0,0]};G.forEach((g,gi)=>{if(vis(g))D.add(gi)});
  G.forEach((g,gi)=>vis(g)&&g.qs.forEach((q,qi)=>{r[g.s][1]++;if(A[gi+'_'+qi]===q.a)r[g.s][0]++}));
  res.textContent='聽力 '+r.L[0]+'/'+r.L[1]+'　閱讀 '+r.R[0]+'/'+r.R[1]+'　合計 '+(r.L[0]+r.R[0])+'/'+(r.L[1]+r.R[1]);
- res.textContent=SUBN()+'　答對 '+(r.L[0]+r.R[0])+' / '+(r.L[1]+r.R[1])+' 題';render();
+ res.textContent=SUBN()+'　答對 '+(r.L[0]+r.R[0])+' / '+(r.L[1]+r.R[1])+' 題';
+ if(sub==='test'){const bk={},nm={'Part 5':'Part 5','Part 6':'Part 6','Part 7':'P7 單篇','P7M':'P7 多篇'};TEST.order.forEach(gi=>{const g=G[gi],k=gk(g);bk[k]=bk[k]||[0,0];g.qs.forEach((q,qi)=>{bk[k][1]++;if(A[gi+'_'+qi]===q.a)bk[k][0]++})});res.textContent+='（'+Object.keys(bk).map(k=>nm[k]+' '+bk[k][0]+'/'+bk[k][1]).join('｜')+'）'}
+ render();
 };
 document.getElementById('rst').onclick=()=>{tok++;speechSynthesis.cancel();G.forEach((g,gi)=>{if(vis(g)){D.delete(gi);delete SW[gi];delete RV[gi];delete RP[gi];delete VN[gi];g.qs.forEach((q,qi)=>delete A[gi+'_'+qi])}});res.textContent='';render();window.scrollTo(0,0)};
 if(window.speechSynthesis){speechSynthesis.onvoiceschanged=loadV;loadV()}
